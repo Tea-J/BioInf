@@ -15,6 +15,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,52 +30,73 @@ public class RabinKarp {
     private byte[] sequenceData = null;
     private Path genomePath = null;
     private Path sequencePath = null;
-    private int prime = 7;
     private Path genomePath2 = null;
     private Path sequencePath2 = null;
     private int sequenceSize;
     private int genomeSize;
     private long sequenceHash;
+    private int sequenceSum;
+    private long genomeHash;
+    private int genomeSum;
     private int hashHits = 0;
     private int actualHits = 0;
+    List<Integer> list = new ArrayList<>();
 
-    //TODO provjeriti usporedbe int == int, byte == byte ili mora biti equals, razlika u brzini
-    
+
+    private long genomeHashTest;
+    private int genomeSumTest;
+
+    //TODO provjeriti usporedbe int == int, byte == byte, long == long ili mora biti equals, razlika u brzini
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
 
-        //File file = new File("C:\\Users\\serz\\Desktop\\BIOINF\\PROJEKT\\Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa");
         Path genomePath = Paths.get("C:\\Users\\serz\\Desktop\\BIOINF\\PROJEKT\\Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa");
-        Path sequencePath = Paths.get("C:\\Users\\serz\\Desktop\\BIOINF\\PROJEKT\\tekst.txt");//
-
-        long start = System.currentTimeMillis();
-
-         int primeNum = 101;
-        if (args.length == 3) {
-            try {
-                primeNum = Integer.parseInt(args[2]);
-            } catch (NumberFormatException e) {
-                System.out.println("Third argument is not a number!");
-                return;
-            }
+        Path sequencePath = Paths.get("C:\\Users\\serz\\Desktop\\BIOINF\\PROJEKT\\tekst.txt");
+        
+//        Path genomePath = Paths.get("C:\\Users\\serz\\Desktop\\BIOINF\\PROJEKT\\gen.txt");
+//        Path sequencePath = Paths.get("C:\\Users\\serz\\Desktop\\BIOINF\\PROJEKT\\tekst.txt");
+        
+        if(args.length == 2){
+            genomePath = Paths.get(args[0]);
+            sequencePath = Paths.get(args[1]);
         }
+//        else{
+//            System.out.println("Program requires two arguments: ");
+//            System.out.println("1. Path to genome");
+//            System.out.println("2. Path to sequence");
+//            return;
+//        }
 
-        RabinKarp rabinKarp = new RabinKarp(genomePath, sequencePath, primeNum);
-        rabinKarp.hash(1);
-        rabinKarp.prepareFiles();
-        rabinKarp.readFiles();
-        long end = System.currentTimeMillis();
-        System.out.println("Time elapsed: " + (end - start) + "ms");
-
-        rabinKarp.runRabinKarp();
+        RabinKarp rabinKarp = new RabinKarp(genomePath, sequencePath);
+        rabinKarp.startRabinKarp();
+        //rabinKarp.test();
+        
     }
 
-    RabinKarp(Path genomePath, Path sequencePath, int prime) {
+    RabinKarp(Path genomePath, Path sequencePath) {
         this.genomePath = genomePath;
         this.sequencePath = sequencePath;
-        this.prime = prime;
+    }
+    
+    void startRabinKarp(){
+        long start = System.currentTimeMillis();
+
+        prepareFiles();
+        readFiles();
+        setPrimes();        
+        runRabinKarp();
+
+        long end = System.currentTimeMillis();
+        System.out.println("Ukupno vrijeme: " + (end - start) + " ms");
+        System.out.println("Ukupno vrijeme: " + (end - start)/1000 + " s");
+        System.out.format("Pogodenih uzoraka/Pogodenih Hasheva: %d/%d \n", actualHits, hashHits);
+        
+        for(Integer i : list){
+            System.out.println("Polozaj pocetka podniza: " + i);
+        }
+
     }
 
     void prepareFiles() {
@@ -120,45 +143,137 @@ public class RabinKarp {
     }
 
     private void runRabinKarp() {
-        long genomeHash = initHash();
         int i = 0;
-        while(i <= (genomeSize - sequenceSize)){
-            if(genomeHash == sequenceHash){
+        
+        initHash();
+        
+        while (i < (genomeSize - sequenceSize)) {
+            if (genomeHash == sequenceHash && genomeSum == sequenceSum) {
                 hashHits++;
-                if(checkPattern(i)){
+                if (checkPattern(i)) {
                     actualHits++;
+                    list.add(i);
                     //vrati odmah da ima ili broji kolko ih ima ili spremi pocetne indexe svakog ponavljanja
                 }
             }
-            genomeHash = hash(++i); // paziti na zadnjeg da en cita iz elementa većeg od veličine polja
+            hash(++i);
+            System.out.format("%d/%d \n", i, genomeSize);
         }
-    }
-
-    long hash(int start) {
-        long hash = 0;
-        
-
-        return hash;
-    }
-
-    long initHash() {
-        long seqhash = 0;
-        long hash = 0;
-        for(int i = 0; i < sequenceSize ; ++i){
-
-            
-        }
-        sequenceHash = seqhash;
-        return hash;
-    }
-    
-    boolean checkPattern(int start){
-        boolean b = true;
-        for(int i = 0; i < sequenceSize; ++i){
-            if(sequenceData[i] != genomeData[start + i]){
-               return false;
+        // check last sequence 
+        if (genomeHash == sequenceHash && genomeSum == sequenceSum) {
+            hashHits++;
+            if (checkPattern(i)) {
+                actualHits++;
+                list.add(i);
             }
-        }        
-        return b;
+        }
+    }
+
+    void hash(int start) {
+        byte oldByte = genomeData[start - 1];
+        byte newByte = genomeData[start + sequenceSize - 1];
+
+        genomeSum = genomeSum - oldByte + newByte;
+        genomeHash = genomeHash - oldByte * sequenceSize + genomeSum;
+    }
+
+    void initHash() {
+        for (int i = 0; i < sequenceSize; ++i) {
+            sequenceSum += sequenceData[i];
+            sequenceHash += (sequenceSize - i) * sequenceData[i];
+            genomeSum += genomeData[i];
+            genomeHash += (sequenceSize - i) * genomeData[i];
+        }
+    }
+
+    boolean checkPattern(int start) {
+        for (int i = 0; i < sequenceSize; ++i) {
+            if (sequenceData[i] != genomeData[start + i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void setPrimes() {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < genomeSize; ++i) {
+            switch (genomeData[i]) {
+                case 65:
+                    genomeData[i] = 2;
+                    break; // cahnge 'A' to 2
+                case 67:
+                    genomeData[i] = 19;
+                    break; // cahnge 'C' to 19
+                case 71:
+                    genomeData[i] = 47;
+                    break; // cahnge 'G' to 47
+                case 84:
+                    genomeData[i] = 79;
+                    break; // cahnge 'T' with 79
+                case 85:
+                    genomeData[i] = 109;
+                    break; // cahnge 'U' with 109
+            }
+        }
+        for (int i = 0; i < sequenceSize; ++i) {
+            switch (sequenceData[i]) {
+                case 65:
+                    sequenceData[i] = 2;
+                    break; // cahnge 'A' to 2
+                case 67:
+                    sequenceData[i] = 19;
+                    break; // cahnge 'C' to 19
+                case 71:
+                    sequenceData[i] = 47;
+                    break; // cahnge 'G' to 47
+                case 84:
+                    sequenceData[i] = 79;
+                    break; // cahnge 'T' with 79
+                case 85:
+                    sequenceData[i] = 109;
+                    break; // cahnge 'U' with 109
+            }
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("Ukupno vrijeme pretvorbe u proste: " + (end - start) + "ms");
+    }
+
+    void test() {
+        long start, end;
+
+        start = System.currentTimeMillis();
+        prepareFiles();
+        readFiles();
+        end = System.currentTimeMillis();
+        System.out.println("Time elapsed for reading: " + (end - start) + "ms");
+
+        start = System.currentTimeMillis();
+        initHash();
+        end = System.currentTimeMillis();
+        System.out.println("Time elapsed for init hash computation: " + (end - start) + "ms");
+
+        for (int i = 1; i < 10; ++i) {
+            start = System.nanoTime();
+            hash(i);
+            end = System.nanoTime();
+            System.out.println("Time elapsed 1 cyclic hash: " + (end - start) / 1000 + "us");
+            start = System.currentTimeMillis();
+            testHash(i);
+            end = System.currentTimeMillis();
+            System.out.println("Time elapsed for 1 full hash: " + (end - start) + "ms");
+            if (genomeHash != genomeHashTest || genomeSum != genomeSumTest) {
+                System.out.println("krivo računa hash");
+            }
+        }
+    }
+
+    void testHash(int start) {
+        genomeHashTest = 0;
+        genomeSumTest = 0;
+        for (int i = 0; i < sequenceSize; ++i) {
+            genomeSumTest += genomeData[i + start];
+            genomeHashTest += (sequenceSize - i) * genomeData[i + start];
+        }
     }
 }
