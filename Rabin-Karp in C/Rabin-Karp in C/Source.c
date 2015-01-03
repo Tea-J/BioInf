@@ -22,11 +22,40 @@ int Hash(char *substring){
 	return hash_value;
 }
 
+int Search(char *string, char *pattern){
+	int hpattern, lpattern, lstring, hsubstring, i;
+	char *substring;
+
+	hpattern = Hash(pattern);
+	lpattern = strlen(pattern);
+	lstring = strlen(string);
+	substring = (char *)malloc(sizeof(char)*lpattern);
+
+	for (i = 0; i < lstring - lpattern + 1; i++){
+		strncpy_s(substring, lpattern + 1, string + i, lpattern);
+		hsubstring = Hash(substring);
+
+		if (hpattern == hsubstring)
+			return i;
+	}
+
+	return -1;	//ako ne nadje
+}
+
 int main(){
+	int pom;
+	char *Niz = "abrakadabra";
+	//podniz do 4 znaka
+	char *Podniz = "rak";
 
-	char *pom = "bra";
+	pom = Search(Niz, Podniz);
 
-	printf("Hash value for \"%s\" is %d.\n", pom, Hash(pom));
+	if (pom < 0){
+		printf("Nema rezultata.\n");
+	}
+	else{
+		printf("Podniz se nalazi na indexu %d.\n", pom);
+	}
 
 	getchar();
 
