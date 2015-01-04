@@ -1,6 +1,7 @@
 //Rabin-Karp algorithm in C
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #define base 101
@@ -16,45 +17,62 @@ int Hash(char *substring){
 
 	hash_value = 0;
 	for (i = 0; i < N; i++){
-		hash_value += (Ascii(*(substring + i)))*((int)(pow(base, N - i - 1)));
+		hash_value += (Ascii(*(substring + i)))*((int)(pow((double)base, N - i - 1)));
 	}
 
 	return hash_value;
 }
 
-int Search(char *string, char *pattern){
-	int hpattern, lpattern, lstring, hsubstring, i;
+int Search(char* string, char *patterns[], int num_patterns, int lpatterns){
+	int lstring, hsubstring, i, j, return_value;
+	int *hpattern;
 	char *substring;
 
-	hpattern = Hash(pattern);
-	lpattern = strlen(pattern);
-	lstring = strlen(string);
-	substring = (char *)malloc(sizeof(char)*lpattern);
+	hpattern = (int *)malloc(num_patterns*sizeof(int));
 
-	for (i = 0; i < lstring - lpattern + 1; i++){
-		strncpy_s(substring, lpattern + 1, string + i, lpattern);
+	for(i = 0; i < num_patterns; i++) {
+		*(hpattern+i) = Hash(patterns[i]);
+    }
+	
+	lstring = strlen(string);
+	substring = (char *)malloc((lpatterns + 1)*sizeof(char));
+
+	return_value = -1;	//if no substring was found
+
+	for (i = 0; i < lstring - lpatterns + 1; i++){
+		strncpy_s(substring, lpatterns + 1, string + i, lpatterns);
 		hsubstring = Hash(substring);
 
-		if (hpattern == hsubstring)
-			return i;
+		for(j = 0; j < num_patterns; j++){
+			if (hsubstring == *(hpattern+j)){
+				return_value = i;
+				break;
+			}
+		}
+
+		if (return_value != (-1)){
+			break;
+		}
 	}
 
-	return -1;	//ako ne nadje
+	return return_value;
 }
 
 int main(){
-	int pom;
-	char *Niz = "abrakadabra";
-	//podniz do 4 znaka
-	char *Podniz = "rak";
+	int result;
+	char *string = "abrakadabra";
 
-	pom = Search(Niz, Podniz);
+	char *subs[] = { "aka", "aba", "dab", "ada" };
+	//Currently, max lenght of a substring is 4 characters
+	//TO DO: test max lenght if the hash value is unsigned int or long
+    
+    result = Search(string, subs, 4, 3);
 
-	if (pom < 0){
-		printf("Nema rezultata.\n");
+	if (result < 0){
+		printf("No results.\n");
 	}
 	else{
-		printf("Podniz se nalazi na indexu %d.\n", pom);
+		printf("The substring is found at index %d.\n", result);
 	}
 
 	getchar();
