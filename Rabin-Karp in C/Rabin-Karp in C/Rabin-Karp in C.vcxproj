@@ -62,6 +62,9 @@
   <ItemGroup>
     <ClCompile Include="Source.c" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\Visual Studio 2010\Projects\Rabin-Karp in C\Rabin-Karp in C\Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

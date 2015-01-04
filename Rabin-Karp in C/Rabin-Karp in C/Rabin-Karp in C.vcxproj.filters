@@ -19,4 +19,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\Visual Studio 2010\Projects\Rabin-Karp in C\Rabin-Karp in C\Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

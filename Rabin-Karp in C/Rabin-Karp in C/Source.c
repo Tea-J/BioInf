@@ -4,31 +4,38 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <errno.h>
+
 #define base 101
+#define N 80
 
 
 int Ascii(char c){
 	return c;
 }
 
-int Hash(char *substring){
-	int i, hash_value;
-	int N = strlen(substring);
-
+long Hash(char *substring){
+	int i, lsubstring;
+	long hash_value;
+	
+	lsubstring = strlen(substring);
+	
 	hash_value = 0;
-	for (i = 0; i < N; i++){
-		hash_value += (Ascii(*(substring + i)))*((int)(pow((double)base, N - i - 1)));
+
+	for (i = 0; i < lsubstring; i++){
+		hash_value += (Ascii(*(substring + i)))*((long)(pow((double)base, lsubstring - i - 1)));
 	}
 
 	return hash_value;
 }
 
 int Search(char* string, char *patterns[], int num_patterns, int lpatterns){
-	int lstring, hsubstring, i, j, return_value;
-	int *hpattern;
+	int lstring, i, j, return_value;
+	long hsubstring;
+	long *hpattern;
 	char *substring;
 
-	hpattern = (int *)malloc(num_patterns*sizeof(int));
+	hpattern = (long *)malloc(num_patterns*sizeof(long));
 
 	for(i = 0; i < num_patterns; i++) {
 		*(hpattern+i) = Hash(patterns[i]);
@@ -55,26 +62,65 @@ int Search(char* string, char *patterns[], int num_patterns, int lpatterns){
 		}
 	}
 
+	free(substring);
 	return return_value;
 }
 
 int main(){
-	int result;
+	FILE *genome; 
+	int result, flag, errnum;
+	char *buffer;
 	char *string = "abrakadabra";
-
 	char *subs[] = { "aka", "aba", "dab", "ada" };
-	//Currently, max lenght of a substring is 4 characters
-	//TO DO: test max lenght if the hash value is unsigned int or long
-    
-    result = Search(string, subs, 4, 3);
+	//max lenght of a substring is 4 characters
+	//i.e. for "TTTTT" we don't get correct hash value
 
+	genome = fopen("C:\\Users\\tea\\Documents\\Visual Studio 2010\\Projects\\Rabin-Karp in C\\Rabin-Karp in C\\Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa", "r");
+	
+	if (genome == NULL){
+		errnum = errno;
+		fprintf(stderr, "Error opening file: %s\n", strerror( errnum ));
+		getchar();
+		return 0;
+	}
+
+	// 4758629+1;
+
+	buffer = (char *)malloc(N*sizeof(char));
+	flag = 0;	//from the start
+
+	//fgets(ulaz, N, genome);	//read line
+	
+	while (fgets(buffer, N, genome)){
+
+		if (*buffer == '>'){
+			flag = 0;
+			continue;
+		}
+
+		if (flag == 0){
+			//kopiraj buffer u string i pozovi search
+		} else {
+			//kopiraj zadnja dva znaka iz niza na poèetak
+			//u nastavak nakelji nove podatke
+			//pozovi search
+		}
+
+	}
+
+		
+
+	//Initial test
+    result = Search(string, subs, 4, 3); 
+	
 	if (result < 0){
 		printf("No results.\n");
 	}
 	else{
-		printf("The substring is found at index %d.\n", result);
+		printf("A substring was found at index %d.\n", result);
 	}
-
+	
+	fclose(genome);
 	getchar();
 
 	return 0;
