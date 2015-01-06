@@ -70,8 +70,9 @@ int main(){
 	FILE *genome; 
 	int result, flag, errnum;
 	char *buffer;
-	char *string = "abrakadabra";
-	char *subs[] = { "aka", "aba", "dab", "ada" };
+	char *string;
+	//char *string = "abrakadabra";
+	char *subs[] = { "aka", "TCA", "dab", "ada" };
 	//max lenght of a substring is 4 characters
 	//i.e. for "TTTTT" we don't get correct hash value
 
@@ -87,7 +88,9 @@ int main(){
 	// 4758629+1;
 
 	buffer = (char *)malloc(N*sizeof(char));
+	string = (char *)malloc(N*sizeof(char));
 	flag = 0;	//from the start
+	result = -1;
 
 	//fgets(ulaz, N, genome);	//read line
 	
@@ -99,19 +102,24 @@ int main(){
 		}
 
 		if (flag == 0){
-			//kopiraj buffer u string i pozovi search
+			strncpy_s(string, strlen(buffer)+1, buffer, strlen(buffer));
+			result = Search(string, subs, 4, 3);
+			flag=1;
 		} else {
-			//kopiraj zadnja dva znaka iz niza na poèetak
-			//u nastavak nakelji nove podatke
-			//pozovi search
+			strncpy_s(string, 3, string+strlen(string)-2, 2);
+			strncpy_s(string+2, strlen(buffer)+1, buffer, strlen(buffer));
+			result = Search(string, subs, 4, 3);
 		}
+
+		if (result >= 0)
+				break;
 
 	}
 
 		
 
 	//Initial test
-    result = Search(string, subs, 4, 3); 
+    //result = Search(string, subs, 4, 3); 
 	
 	if (result < 0){
 		printf("No results.\n");
@@ -121,6 +129,8 @@ int main(){
 	}
 	
 	fclose(genome);
+	free(buffer);
+	free(string);
 	getchar();
 
 	return 0;
