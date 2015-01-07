@@ -1,4 +1,4 @@
-﻿Build started 6.1.2015. 7:46:47.
+﻿Build started 7.1.2015. 13:55:57.
      1>Project "C:\Users\tea\Documents\GitHub\BioInf\Rabin-Karp in C\Rabin-Karp in C\Rabin-Karp in C.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Rabin-Karp in C.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -22,4 +22,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.60
+Time Elapsed 00:00:00.56

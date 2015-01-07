@@ -68,11 +68,11 @@ int Search(char* string, char *patterns[], int num_patterns, int lpatterns){
 
 int main(){
 	FILE *genome; 
-	int result, flag, errnum;
+	int result, lbuffer, offset, flag, errnum;
 	char *buffer;
 	char *string;
 	//char *string = "abrakadabra";
-	char *subs[] = { "aka", "TCA", "dab", "ada" };
+	char *subs[] = { "aka", "CCCG", "dab", "ada" };
 	//max lenght of a substring is 4 characters
 	//i.e. for "TTTTT" we don't get correct hash value
 
@@ -85,14 +85,11 @@ int main(){
 		return 0;
 	}
 
-	// 4758629+1;
-
 	buffer = (char *)malloc(N*sizeof(char));
 	string = (char *)malloc(N*sizeof(char));
 	flag = 0;	//from the start
+	offset = 0;
 	result = -1;
-
-	//fgets(ulaz, N, genome);	//read line
 	
 	while (fgets(buffer, N, genome)){
 
@@ -101,31 +98,37 @@ int main(){
 			continue;
 		}
 
+		//printf("buffer:\n%s", buffer);
+		lbuffer = strlen(buffer)-1;	//when using fgets, strlen counts '\n'
+
 		if (flag == 0){
-			strncpy_s(string, strlen(buffer)+1, buffer, strlen(buffer));
-			result = Search(string, subs, 4, 3);
+			strncpy_s(string, lbuffer+1, buffer, lbuffer);
+			result = Search(string, subs, 4, 4);
+			if (result >= 0){
+				break;
+			}
 			flag=1;
-		} else {
+		} 
+		else {
 			strncpy_s(string, 3, string+strlen(string)-2, 2);
-			strncpy_s(string+2, strlen(buffer)+1, buffer, strlen(buffer));
-			result = Search(string, subs, 4, 3);
+			strncpy_s(string+2, lbuffer+1, buffer, lbuffer);
+			result = Search(string, subs, 4, 4);
+			if (result >= 0){
+				result=result-2;
+				break;
+			}
 		}
 
-		if (result >= 0)
-				break;
-
+		offset += lbuffer;
+		//printf("offset + lbuffer %d\n", offset);
 	}
 
-		
-
-	//Initial test
-    //result = Search(string, subs, 4, 3); 
 	
 	if (result < 0){
 		printf("No results.\n");
 	}
 	else{
-		printf("A substring was found at index %d.\n", result);
+		printf("A substring was found at index %d.\n", offset + result);
 	}
 	
 	fclose(genome);
