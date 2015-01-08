@@ -70,8 +70,8 @@ public class RabinKarp {
 //        }
 
         RabinKarp rabinKarp = new RabinKarp(genomePath, sequencePath);
-        rabinKarp.startRabinKarp();
-        //rabinKarp.test();
+        //rabinKarp.startRabinKarp();
+        rabinKarp.test();
         
     }
 
@@ -239,6 +239,7 @@ public class RabinKarp {
 
     void test() {
         long start, end;
+        boolean hashFault = false;
 
         start = System.currentTimeMillis();
         prepareFiles();
@@ -251,18 +252,24 @@ public class RabinKarp {
         end = System.currentTimeMillis();
         System.out.println("Time elapsed for init hash computation: " + (end - start) + "ms");
 
-        for (int i = 1; i < 10; ++i) {
+        for (int i = 1; i < 100; ++i) {
             start = System.nanoTime();
             hash(i);
             end = System.nanoTime();
             System.out.println("Time elapsed 1 cyclic hash: " + (end - start) / 1000 + "us");
-            start = System.currentTimeMillis();
+            start = System.nanoTime();
             testHash(i);
-            end = System.currentTimeMillis();
-            System.out.println("Time elapsed for 1 full hash: " + (end - start) + "ms");
+            end = System.nanoTime();
+            System.out.println("Time elapsed for 1 full hash: " + (end - start) / 1000 + "us");
             if (genomeHash != genomeHashTest || genomeSum != genomeSumTest) {
-                System.out.println("krivo računa hash");
+                hashFault = true;
             }
+        }
+        if (hashFault){
+            System.out.println("Problem with hash calculation");
+        }
+        else{
+            System.out.println("Hash calculation works perfect");
         }
     }
 
