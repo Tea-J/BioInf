@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 #include <errno.h>
 
 #define base 101
@@ -72,9 +73,12 @@ int main(){
 	char *buffer;
 	char *string;
 	//char *string = "abrakadabra";
-	char *subs[] = { "aka", "CCCG", "dab", "ada" };
+	char *subs[] = { "aka", "TAATATGCAA", "dab", "ada" };
 	//max lenght of a substring is 4 characters
 	//i.e. for "TTTTT" we don't get correct hash value
+
+	time_t start, end;
+	double dif;
 
 	genome = fopen("C:\\Users\\tea\\Documents\\Visual Studio 2010\\Projects\\Rabin-Karp in C\\Rabin-Karp in C\\Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa", "r");
 	
@@ -90,6 +94,8 @@ int main(){
 	flag = 0;	//from the start
 	offset = 0;
 	result = -1;
+
+	time(&start);
 	
 	while (fgets(buffer, N, genome)){
 
@@ -103,7 +109,7 @@ int main(){
 
 		if (flag == 0){
 			strncpy_s(string, lbuffer+1, buffer, lbuffer);
-			result = Search(string, subs, 4, 4);
+			result = Search(string, subs, 4, 10);
 			if (result >= 0){
 				break;
 			}
@@ -112,7 +118,7 @@ int main(){
 		else {
 			strncpy_s(string, 3, string+strlen(string)-2, 2);
 			strncpy_s(string+2, lbuffer+1, buffer, lbuffer);
-			result = Search(string, subs, 4, 4);
+			result = Search(string, subs, 4, 10);
 			if (result >= 0){
 				result=result-2;
 				break;
@@ -123,6 +129,8 @@ int main(){
 		//printf("offset + lbuffer %d\n", offset);
 	}
 
+	time(&end);
+	dif = difftime(end, start);
 	
 	if (result < 0){
 		printf("No results.\n");
@@ -130,6 +138,8 @@ int main(){
 	else{
 		printf("A substring was found at index %d.\n", offset + result);
 	}
+
+	printf ("Calculations took %.2lf seconds to run.\n", dif );
 	
 	fclose(genome);
 	free(buffer);
