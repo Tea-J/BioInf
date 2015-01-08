@@ -90,7 +90,6 @@ public class RabinKarp {
 
         long end = System.currentTimeMillis();
         System.out.println("Ukupno vrijeme: " + (end - start) + " ms");
-        System.out.println("Ukupno vrijeme: " + (end - start)/1000 + " s");
         System.out.format("Pogodenih uzoraka/Pogodenih Hasheva: %d/%d \n", actualHits, hashHits);
         
         for(Integer i : list){
@@ -157,7 +156,6 @@ public class RabinKarp {
                 }
             }
             hash(++i);
-            System.out.format("%d/%d \n", i, genomeSize);
         }
         // check last sequence 
         if (genomeHash == sequenceHash && genomeSum == sequenceSum) {
@@ -196,7 +194,7 @@ public class RabinKarp {
     }
 
     void setPrimes() {
-        long start = System.currentTimeMillis();
+        //long start = System.currentTimeMillis();
         for (int i = 0; i < genomeSize; ++i) {
             switch (genomeData[i]) {
                 case 65:
@@ -235,8 +233,8 @@ public class RabinKarp {
                     break; // cahnge 'U' with 109
             }
         }
-        long end = System.currentTimeMillis();
-        System.out.println("Ukupno vrijeme pretvorbe u proste: " + (end - start) + "ms");
+        //long end = System.currentTimeMillis();
+        //System.out.println("Ukupno vrijeme pretvorbe u proste: " + (end - start) + "ms");
     }
 
     void test() {
