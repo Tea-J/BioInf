@@ -70,8 +70,8 @@ public class RabinKarp {
 //        }
 
         RabinKarp rabinKarp = new RabinKarp(genomePath, sequencePath);
-        rabinKarp.startRabinKarp();
-        //rabinKarp.test();
+        //rabinKarp.startRabinKarp();
+        rabinKarp.test();
         
     }
 
@@ -90,7 +90,6 @@ public class RabinKarp {
 
         long end = System.currentTimeMillis();
         System.out.println("Ukupno vrijeme: " + (end - start) + " ms");
-        System.out.println("Ukupno vrijeme: " + (end - start)/1000 + " s");
         System.out.format("Pogodenih uzoraka/Pogodenih Hasheva: %d/%d \n", actualHits, hashHits);
         
         for(Integer i : list){
@@ -157,7 +156,6 @@ public class RabinKarp {
                 }
             }
             hash(++i);
-            System.out.format("%d/%d \n", i, genomeSize);
         }
         // check last sequence 
         if (genomeHash == sequenceHash && genomeSum == sequenceSum) {
@@ -196,7 +194,7 @@ public class RabinKarp {
     }
 
     void setPrimes() {
-        long start = System.currentTimeMillis();
+        //long start = System.currentTimeMillis();
         for (int i = 0; i < genomeSize; ++i) {
             switch (genomeData[i]) {
                 case 65:
@@ -235,12 +233,13 @@ public class RabinKarp {
                     break; // cahnge 'U' with 109
             }
         }
-        long end = System.currentTimeMillis();
-        System.out.println("Ukupno vrijeme pretvorbe u proste: " + (end - start) + "ms");
+        //long end = System.currentTimeMillis();
+        //System.out.println("Ukupno vrijeme pretvorbe u proste: " + (end - start) + "ms");
     }
 
     void test() {
         long start, end;
+        boolean hashFault = false;
 
         start = System.currentTimeMillis();
         prepareFiles();
@@ -253,18 +252,24 @@ public class RabinKarp {
         end = System.currentTimeMillis();
         System.out.println("Time elapsed for init hash computation: " + (end - start) + "ms");
 
-        for (int i = 1; i < 10; ++i) {
+        for (int i = 1; i < 100; ++i) {
             start = System.nanoTime();
             hash(i);
             end = System.nanoTime();
             System.out.println("Time elapsed 1 cyclic hash: " + (end - start) / 1000 + "us");
-            start = System.currentTimeMillis();
+            start = System.nanoTime();
             testHash(i);
-            end = System.currentTimeMillis();
-            System.out.println("Time elapsed for 1 full hash: " + (end - start) + "ms");
+            end = System.nanoTime();
+            System.out.println("Time elapsed for 1 full hash: " + (end - start) / 1000 + "us");
             if (genomeHash != genomeHashTest || genomeSum != genomeSumTest) {
-                System.out.println("krivo računa hash");
+                hashFault = true;
             }
+        }
+        if (hashFault){
+            System.out.println("Problem with hash calculation");
+        }
+        else{
+            System.out.println("Hash calculation works perfect");
         }
     }
 
