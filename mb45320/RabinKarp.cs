@@ -117,6 +117,40 @@ namespace Bioinformatika
             }
             return patterns.ToArray();
         }
+
+        private static List<int> Search(string genome, string pattern) 
+        {
+            var patternInstances = new List<int>();
+
+            ulong patternLength = (ulong) pattern.Length, genomeLength = (ulong) genome.Length;
+
+            var hashes = CalculateInitialHash(genome, pattern, patternLength, BASE);
+
+            ulong genomeHash = hashes.Item1, patternHash = hashes.Item2;
+
+            if (genomeHash == patternHash)
+            {
+                if (IsSubstring(genome, pattern, 0))
+                    patternInstances.Add(0);
+            }
+			
+			ulong factor = CalculateFactor(patternLength, BASE);
+
+            for (int i = (int) patternLength; i < (int) genomeLength; i++)
+            {
+                genomeHash -= (genome[i - (int)patternLength] * factor);// % HASH_SIZE;
+                genomeHash *= BASE;
+                genomeHash += genome[i];
+                //genomeHash %= HASH_SIZE;
+
+                //genomeHash = (BASE * (genomeHash - (factor * genome[i - (int)patternLength])) + genome[i]) % HASH_SIZE;
+                if (genomeHash == patternHash)
+                    if (IsSubstring(genome, pattern, i - (int)patternLength + 1))
+                        patternInstances.Add(i - (int) patternLength + 1);
+            }
+
+            return patternInstances;
+        }
 		
         private static Tuple<ulong,ulong> CalculateInitialHash(string genome, string pattern, ulong patternSize, ulong pBase)
         {
