@@ -13,6 +13,70 @@ namespace Bioinformatika
         const ulong BASE = 11;
         //const ulong HASH_SIZE = (2 << 20);
 
+		
+		 public static void Main(string[] args)
+        {
+            const int NUMBER_OF_INPUT_ARGUMENTS = 2;
+            const int GENOME_FILE_INDEX = 0;
+            const int PATTERN_FILE_INDEX = 1;
+
+            var genomeFilePath = args[GENOME_FILE_INDEX];
+
+            try
+            {
+                var genomeTry = File.OpenRead(genomeFilePath);
+                genomeTry.Close();
+                genomeTry.Dispose();
+            }
+            catch
+            {
+                Console.WriteLine("Could not open the genome file!");
+                return;
+            }
+
+            var patternFilePath = args[PATTERN_FILE_INDEX];
+
+            try
+            {
+                var patternTry = File.OpenRead(patternFilePath);
+                patternTry.Close();
+                patternTry.Dispose();
+            }
+            catch
+            {
+                Console.WriteLine("Could not open the pattern file!");
+                return;
+            }
+			
+            var genome = ReadGenomeFromFile(genomeFilePath);
+            var patterns = ReadPatternsFromFile(patternFilePath);
+
+            if (patterns.Length == 1)
+            {
+                var instances = Search(genome, patterns[0]);
+                if (instances.Count > 0)
+                {
+                    Console.Write("Pattern instances found on the following indices: ");
+                    foreach (var instance in instances)
+                        Console.Write("{0} ", instance);
+                    Console.WriteLine();
+                }
+                else
+                {
+                    Console.WriteLine("No pattern instances found.");
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("{0} false positives found.", falsePositive);
+
+                Console.ReadKey();
+                return;
+            }
+
+            Console.WriteLine("Multiple  patterns  not supported... :(");
+        }
+		
+		
         private static Tuple<ulong,ulong> CalculateInitialHash(string genome, string pattern, ulong patternSize, ulong pBase)
         {
             ulong genomeHash = 0;
