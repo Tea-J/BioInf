@@ -14,7 +14,7 @@ namespace Bioinformatika
         //const ulong HASH_SIZE = (2 << 20);
 
 		
-		 public static void Main(string[] args)
+		public static void Main(string[] args)
         {
             const int NUMBER_OF_INPUT_ARGUMENTS = 2;
             const int GENOME_FILE_INDEX = 0;
@@ -76,6 +76,47 @@ namespace Bioinformatika
             Console.WriteLine("Multiple  patterns  not supported... :(");
         }
 		
+        private static string ReadGenomeFromFile(string filePath)
+        {
+            return File.ReadAllText(filePath);
+            //string genome = "";
+            //var lines = File.ReadAllLines(filePath);
+            //if (lines == null)
+            //    return null;
+            //int lineNumber = lines.Length;
+            //for (int i = 0; i < lineNumber; i++)
+            //{
+            //    var line = lines[i];
+            //    //if (string.IsNullOrEmpty(line))
+            //    //    continue;
+            //    //var gen = line.Trim();
+            //    //if (string.IsNullOrEmpty(gen))
+            //    //    continue;
+            //    //if (line.StartsWith(">"))
+            //    //    continue;
+            //    genome += line;
+            //}
+
+            //return genome;
+        }
+
+        private static string[] ReadPatternsFromFile(string filePath)
+        {
+            var patterns = new List<string>();
+
+            var lines = File.ReadAllLines(filePath);
+            if (lines == null)
+                return null;
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrEmpty(line))
+                    continue;
+                if (line.StartsWith(">"))
+                    continue;
+                patterns.Add(line);
+            }
+            return patterns.ToArray();
+        }
 		
         private static Tuple<ulong,ulong> CalculateInitialHash(string genome, string pattern, ulong patternSize, ulong pBase)
         {
