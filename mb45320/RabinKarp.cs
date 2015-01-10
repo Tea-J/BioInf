@@ -152,6 +152,19 @@ namespace Bioinformatika
             return patternInstances;
         }
 		
+        static ulong falsePositive = 0;
+
+        private static bool IsSubstring(string genome, string pattern, int index)
+        {
+            for (int i = 0; i < pattern.Length; i++)
+                if (genome[index + i] != pattern[i])
+                {
+                    falsePositive++;
+                    return false;
+                }
+            return true;
+        }
+		
         private static Tuple<ulong,ulong> CalculateInitialHash(string genome, string pattern, ulong patternSize, ulong pBase)
         {
             ulong genomeHash = 0;
