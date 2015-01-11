@@ -20,7 +20,21 @@ namespace Bioinformatika
             const int GENOME_FILE_INDEX = 0;
             const int PATTERN_FILE_INDEX = 1;
 
+            if (args.Length < NUMBER_OF_INPUT_ARGUMENTS)
+            {
+                Console.WriteLine("Wrong number of input arguments.");
+                Console.WriteLine("Usage:");
+                Console.WriteLine("RabinKarp [genome file path] [pattern file path]");
+                return;
+            }
+
             var genomeFilePath = args[GENOME_FILE_INDEX];
+
+            if (!File.Exists(genomeFilePath))
+            {
+                Console.WriteLine("Genome file does not exist!");
+                return;
+            }
 
             try
             {
@@ -36,6 +50,12 @@ namespace Bioinformatika
 
             var patternFilePath = args[PATTERN_FILE_INDEX];
 
+            if (!File.Exists(patternFilePath))
+            {
+                Console.WriteLine("Pattern file does not exist!");
+                return;
+            }
+
             try
             {
                 var patternTry = File.OpenRead(patternFilePath);
@@ -49,7 +69,20 @@ namespace Bioinformatika
             }
 			
             var genome = ReadGenomeFromFile(genomeFilePath);
+
+            if (string.IsNullOrEmpty(genome))
+            {
+                Console.WriteLine("Genome cannot be an empty string!");
+                return;
+            }
+
             var patterns = ReadPatternsFromFile(patternFilePath);
+
+            if (patterns.Length == 0)
+            {
+                Console.WriteLine("No patterns found!");
+                return;
+            }
 
             if (patterns.Length == 1)
             {
