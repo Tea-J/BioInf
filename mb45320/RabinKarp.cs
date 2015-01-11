@@ -120,6 +120,22 @@ namespace Bioinformatika
 
         private static List<int> Search(string genome, string pattern) 
         {
+
+            if (ReferenceEquals(genome, null))
+                throw new ArgumentNullException("genome", "Genome cannot be null!");
+
+            if (ReferenceEquals(pattern, null))
+                throw new ArgumentNullException("pattern", "Pattern cannot be null!");
+
+            if (string.IsNullOrEmpty(genome))
+                throw new ArgumentException("Genome cannot be an empty string!", "genome");
+
+            if (string.IsNullOrEmpty(pattern))
+                throw new ArgumentException("Pattern  cannot be an empty string!", "pattern");
+
+            if (genome.Length < pattern.Length)
+                throw new ArgumentException("Genome cannot be shoter than the pattern.");
+
             var patternInstances = new List<int>();
 
             ulong patternLength = (ulong) pattern.Length, genomeLength = (ulong) genome.Length;
