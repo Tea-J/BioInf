@@ -4,6 +4,7 @@ import sys
 import os
 import time
 
+
 def openFile(argv):
     with open (argv[0], "r") as genomeFile:
         genomeData = "".join(line.rstrip() for line in genomeFile if (line.startswith(">") != True))
@@ -13,18 +14,29 @@ def openFile(argv):
     sequenceFile.close()
     return (genomeData, sequenceData)
 
+
 def robinKarpAlgorithm(genomeData, sequenceData):
     n = len(genomeData)
     m = len(sequenceData)
-
-
-    for i in range(n - m + 1):
-        flag = 0
-        for j in range (m):
-            if(genomeData[i + j - 1] != sequenceData[j]):
-                flag = 1
-        if(flag == 0):
-            print(i)
+    result = []
+    hash_string = 0
+    hash_pattern = 0
+    for i in range(m):
+        hash_string += ord(genomeData[i])
+        hash_pattern += ord(sequenceData[i])
+    for j in range(n-m+1):
+        if hash_string==hash_pattern:
+            match = True
+            for k in range(m):
+                if sequenceData[k] != genomeData[j+k]:
+                    match = False
+                    break
+            if match:
+                result.append(j)
+        if j < n -m:
+            hash_string -= ord(genomeData[j])
+            hash_string += ord(genomeData[j + m])
+    return result
 
 
 if __name__ == "__main__":
@@ -37,6 +49,7 @@ if __name__ == "__main__":
         print ("Podniz veci od niza!!!")
 
     genomeData, sequenceData = openFile(sys.argv[1:])
-    robinKarpAlgorithm(genomeData, sequenceData)
+    position = robinKarpAlgorithm(genomeData, sequenceData)
+    print (position)
     end = time.time()
     print (end - start)
