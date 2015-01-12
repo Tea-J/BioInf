@@ -4,7 +4,6 @@ import sys
 import os
 import time
 
-
 def openFile(argv):
     with open (argv[0], "r") as genomeFile:
         genomeData = "".join(line.rstrip() for line in genomeFile if (line.startswith(">") != True))
