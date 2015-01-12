@@ -118,9 +118,48 @@ namespace Bioinformatika
                 return;
             }
 
-            Console.WriteLine("Multiple  patterns  not supported... :(");
+            StartMultipleSearch(genome, patterns);
         }
 
+        private static void StartMultipleSearch(string genome, string[] patterns)
+        {
+            if (patterns.Contains(null))
+                throw new ArgumentException("Patterns cannot contain null values!", "patterns");
+
+            var groups = patterns.GroupBy(pattern => pattern.Length);
+            foreach (var group in groups)
+            {
+                var groupArray = group.ToArray();
+                SearchGroup(genome, groupArray);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("False positives: {0} ", falsePositive);
+            Console.ReadKey();
+        }
+
+        private static void SearchGroup(string genome, string[] patterns)
+        {
+            var instances = SearchMultiple(genome, patterns);
+
+            bool found = false;
+            for (int i = 0; i < patterns.Length; i++)
+            {
+                if (instances[i].Count > 0)
+                {
+                    Console.Write("{0} found on indices: ", patterns[i]);
+                    foreach (var index in instances[i])
+                        Console.Write("{0} ", index);
+                    Console.WriteLine();
+                    found = true;
+                }
+                if (!found)
+                {
+                    Console.WriteLine("No patterns of length {0} found in the genome.", patterns[0].Length);
+                }
+            }
+            Console.WriteLine();
+        }
 
         private static string ReadGenomeFromFile(string filePath)
         {
@@ -162,6 +201,84 @@ namespace Bioinformatika
                 patterns.Add(line);
             }
             return patterns.ToArray();
+        }
+
+        private static List<int>[] SearchMultiple(string genome, string[] patterns)
+        {
+            if (ReferenceEquals(genome, null))
+                throw new ArgumentNullException("genome", "Genome cannot be null!");
+
+            if (ReferenceEquals(patterns, null))
+                throw new ArgumentNullException("pattern", "Patterns cannot be null!");
+
+            if (string.IsNullOrEmpty(genome))
+                throw new ArgumentException("Genome cannot be an empty string!", "genome");
+
+            if (patterns.Contains(null))
+                throw new ArgumentException("Patterns cannot contain null values!", "pattern");
+
+            if (patterns.Any(pattern => pattern.Length != patterns[0].Length))
+                throw new ArgumentException("All patterns must have the same size!", "pattern");
+
+            if (genome.Length < patterns[0].Length)
+                throw new ArgumentException("Genome cannot be shoter than the pattern.");
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Reset();
+
+            var patternInstances = CreateReturnLists(patterns.Length);
+
+            ulong patternLength = (ulong)patterns[0].Length, genomeLength = (ulong)genome.Length;
+
+            stopwatch.Start();
+            var hashes = CalculateInitialHash(genome, patterns, patternLength, BASE);
+            stopwatch.Stop();
+            Console.WriteLine("Calculating the initial hashes took {0} ms or {1} timer ticks.",
+                    stopwatch.ElapsedMilliseconds, stopwatch.ElapsedTicks);
+
+            ulong genomeHash = hashes.Item1;
+            var patternHashes = hashes.Item2;
+
+            // check for match at offset 0
+            for (int i = 0; i < patternHashes.Length; i++)
+            {
+                if (genomeHash == patternHashes[i])
+                {
+                    stopwatch.Reset();
+                    stopwatch.Start();
+                    if (IsSubstring(genome, patterns[i], 0))
+                        patternInstances[i].Add(0);
+                    stopwatch.Stop();
+                    Console.WriteLine("Comparison of pattern and substring took {0} ms or {1} timer ticks.",
+                        stopwatch.ElapsedMilliseconds, stopwatch.ElapsedTicks);
+                }
+            }
+
+            ulong factor = CalculateFactor(patternLength, BASE);
+
+            stopwatch.Reset();
+            stopwatch.Start();
+            for (int i = (int)patternLength; i < (int)genomeLength; i++)
+            {
+                genomeHash -= (genome[i - (int)patternLength] * factor);// % HASH_SIZE;
+                genomeHash *= BASE;
+                genomeHash += genome[i];
+
+                for (int j = 0; j < patterns.Length; j++)
+                {
+                    if (genomeHash == patternHashes[j])
+                        if (IsSubstring(genome, patterns[j], i - (int)patternLength + 1))
+                            patternInstances[j].Add(i - (int)patternLength + 1);
+                }
+            }
+            stopwatch.Stop();
+            Console.WriteLine("The search took {0} ms or {1} timer ticks. Number of loop iterations was {2}.",
+                stopwatch.ElapsedMilliseconds, stopwatch.ElapsedTicks, genomeLength - 2);
+            Console.WriteLine();
+            if (stopwatch is IDisposable)
+                (stopwatch as IDisposable).Dispose();
+
+            return patternInstances;
         }
 
         private static List<int> Search(string genome, string pattern)
@@ -257,6 +374,31 @@ namespace Bioinformatika
                 patternHash += (pattern[i] * basePower);// % HASH_SIZE;
             }
             return new Tuple<ulong, ulong>(genomeHash, patternHash);
+        }
+
+        private static Tuple<ulong, ulong[]> CalculateInitialHash(string genome, string[] patterns, ulong patternSize, ulong pBase)
+        {
+            ulong genomeHash = 0;
+            ulong[] patternHashes = new ulong[patterns.Length];
+            for (int i = 0; i < patternHashes.Length; i++)
+                patternHashes[i] = 0;
+
+            ulong basePower = 1;
+            for (int i = (int)patternSize - 1; i >= 0; i--, basePower *= pBase)
+            {
+                genomeHash += (genome[i] * basePower);
+                for (int j = 0; j < patterns.Length; j++)
+                    patternHashes[j] += (patterns[j][i] * basePower);
+            }
+            return new Tuple<ulong, ulong[]>(genomeHash, patternHashes);
+        }
+
+        private static List<int>[] CreateReturnLists(int numberOfPatterns)
+        {
+            var returnLists = new List<int>[numberOfPatterns];
+            for (int i = 0; i < numberOfPatterns; i++)
+                returnLists[i] = new List<int>();
+            return returnLists;
         }
 
         private static ulong CalculateFactor(ulong patternSize, ulong pBase)
