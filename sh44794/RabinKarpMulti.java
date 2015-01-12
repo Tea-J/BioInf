@@ -31,10 +31,11 @@ public class RabinKarpMulti {
     private byte[] genomeData = null;
     private HashClass genomeHash = null;
     private boolean sequanceHashesEqualLength = true;
-    private List<HashClass> genomeHashList = new ArrayList<>();
+    private List<HashClass> genomeHashList = null;
     private List<byte[]> sequenceDataList = new ArrayList<>();
     private List<HashClass> sequanceHashList = new ArrayList<HashClass>();
     private int sequenceSize;
+    private int minSequenceSize;
     private int genomeSize;
     private Path[] sequencePathArray = null;
     private Path genomePath = null;
@@ -82,15 +83,19 @@ public class RabinKarpMulti {
         long start = System.currentTimeMillis();
         prepareFiles();
         readFiles();
-        runRabinKarp();
+        if (sequanceHashesEqualLength) {
+            runRabinKarp();
+        } else {
+            runRabinKarpDifferentLengths();
+        }
 
         long end = System.currentTimeMillis();
         System.out.println("Time elapsed: " + (end - start) + " ms");
         System.out.format("Matched patterns/Matched Hashes: %d/%d \n", actualHits, hashHits);
         System.out.format("Hash efficiency: %f \n", ((float) actualHits / hashHits));
 
-        for (Integer i : indexHitList) {
-            System.out.println("Pattern start index : " + i);
+        for (Point p : indexPatternHitList) {
+            System.out.format("Pattern start index %d, pattern num %d \n", p.x, (p.y + 1));
         }
     }
 
@@ -143,6 +148,9 @@ public class RabinKarpMulti {
         for (int i = 1; i < sequenceDataList.size(); ++i) {
             if (sequenceDataList.get(i).length != sequenceSize) {
                 sequanceHashesEqualLength = false;
+                if (sequenceDataList.get(i).length < sequenceSize) {
+                    minSequenceSize = sequenceDataList.get(i).length;
+                }
             }
         }
     }
@@ -182,8 +190,54 @@ public class RabinKarpMulti {
 
     }
 
+    void runRabinKarpDifferentLengths() {
+        int i = 0;
+
+        initHashDiff();
+
+        //TODO provjeravati za do min duljinu podniza i paziti da ove duze ne gledam pred kraj
+        while (i < (genomeSize - minSequenceSize)) {
+            for (int j = 0; j < sequanceHashList.size(); ++j) {
+                if (i <= genomeSize - sequenceDataList.get(j).length) {
+                    HashClass h = sequanceHashList.get(j);
+                    HashClass g = genomeHashList.get(j);
+                    if (g.equals(h)) {
+                        hashHits++;
+                        if (checkPattern(i, j)) {
+                            actualHits++;
+                            indexPatternHitList.add(new Point(i, j));
+                        }
+                    }
+                }
+
+            }
+        }
+        hashDiff(++i);
+
+        // check last sequence 
+        for (int j = 0; j < sequanceHashList.size(); ++j) {
+            HashClass h = sequanceHashList.get(j);
+            if (genomeHash.equals(h)) {
+                hashHits++;
+                if (checkPattern(i, j)) {
+                    actualHits++;
+                    indexPatternHitList.add(new Point(i, j));
+                }
+            }
+        }
+    }
+
     void hash(int start) {
         genomeHash.nextHash(genomeData[start - 1], genomeData[start + sequenceSize - 1], sequenceSize);
+    }
+
+    void hashDiff(int start) {
+        for (int i = 0; i < sequenceDataList.size(); ++i) {
+            HashClass gen = genomeHashList.get(i);
+            int pattLen = sequenceDataList.get(i).length;
+            gen.nextHash(genomeData[start - 1], genomeData[start + pattLen - 1], pattLen);
+        }
+
     }
 
     void initHash() {
@@ -205,6 +259,31 @@ public class RabinKarpMulti {
                 patMull += (sequenceSize - i) * pattern[i];
             }
             sequanceHashList.add(new HashClass(patMull, patSum));
+        }
+    }
+
+    void initHashDiff() {
+        long patMull;
+        long genMull;
+        int patSum;
+        int genSum;
+
+        genomeHashList = new ArrayList<>();
+
+        for (int i = 0; i < sequenceDataList.size(); ++i) {
+            patMull = 0;
+            patSum = 0;
+            genMull = 0;
+            genSum = 0;
+            byte[] pattern = sequenceDataList.get(i);
+            for (int j = 0; j < pattern.length; ++j) {
+                patSum += pattern[i];
+                patMull += (sequenceSize - i) * pattern[i];
+                genSum += genomeData[i];
+                genMull += (sequenceSize - i) * genomeData[i];
+            }
+            sequanceHashList.add(new HashClass(patMull, patSum));
+            genomeHashList.add(new HashClass(genMull, genSum));
         }
     }
 
