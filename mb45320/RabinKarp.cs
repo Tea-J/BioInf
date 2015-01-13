@@ -188,26 +188,30 @@ namespace Bioinformatika
         /// <returns>Genome string.</returns>
         private static string ReadGenomeFromFile(string filePath)
         {
-            return File.ReadAllText(filePath);
-            //string genome = "";
-            //var lines = File.ReadAllLines(filePath);
-            //if (lines == null)
-            //    return null;
-            //int lineNumber = lines.Length;
-            //for (int i = 0; i < lineNumber; i++)
-            //{
-            //    var line = lines[i];
-            //    //if (string.IsNullOrEmpty(line))
-            //    //    continue;
-            //    //var gen = line.Trim();
-            //    //if (string.IsNullOrEmpty(gen))
-            //    //    continue;
-            //    //if (line.StartsWith(">"))
-            //    //    continue;
-            //    genome += line;
-            //}
-
-            //return genome;
+            var lines = File.ReadAllLines(filePath);
+            if (lines.Length == 1)
+                return File.ReadAllText(filePath);
+            else
+            {
+                string genome = "";
+                //var lines = File.ReadAllLines(filePath);
+                if (lines == null)
+                    return null;
+                int lineNumber = lines.Length;
+                for (int i = 0; i < lineNumber; i++)
+                {
+                    var line = lines[i];
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+                    var gen = line.Trim();
+                    if (string.IsNullOrEmpty(gen))
+                        continue;
+                    if (line.StartsWith(">"))
+                        continue;
+                    genome += line;
+                }
+                return genome;
+            }
         }
 
         /// <summary>
@@ -233,6 +237,12 @@ namespace Bioinformatika
             return patterns.ToArray();
         }
 
+        /// <summary>
+        /// Method used to start a Rabin-Karp algorithm search. The specified genome is checked for any appearences of the patterns.
+        /// </summary>
+        /// <param name="genome">Genome.</param>
+        /// <param name="patterns">Patterns.</param>
+        /// <returns>A list containing pattern instance indices.</returns>
         private static List<int>[] SearchMultiple(string genome, string[] patterns)
         {
             if (ReferenceEquals(genome, null))
