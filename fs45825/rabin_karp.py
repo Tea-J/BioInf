@@ -46,10 +46,6 @@ def robinKarpAlgorithm(genomeData, sequenceData):
         if i < n -m:
             sumHash = sumHash - ord(genomeData[i]) + ord(genomeData[i + m])
             mulHash = mulHash - m*ord(genomeData[i]) + sumHash
-            #print (i)
-            #print (sumHash)
-            #print (mulHash)
-
     return (result, broj)
 
 
