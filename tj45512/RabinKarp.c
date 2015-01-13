@@ -38,17 +38,16 @@ int main(){
 	time_t start, end;
 	double dif;
 
-	input = fopen("C:\\Users\\tea\\Documents\\Visual Studio 2010\\Projects\\Rabin-Karp in C\\Rabin-Karp in C\\Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa", "r");
-	genome = fopen("C:\\Users\\tea\\Documents\\Visual Studio 2010\\Projects\\NoviRabinKarp\\NoviRabinKarp\\new.txt", "w");
+	errnum = fopen_s(&input, "Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa", "r");
+	errnum = fopen_s(&genome, "new.txt", "w");
 
-	if (genome == NULL || input == NULL){
-		errnum = errno;
-		fprintf(stderr, "Error opening file: %s\n", strerror(errnum));
+	if (errnum){
+		printf("Error opening file.\n");
 		getchar();
 		return 0;
 	}
 
-	time(&start);
+	start = clock();
 
 	buffer = (char *)malloc(N*sizeof(char));
 
@@ -62,12 +61,11 @@ int main(){
 	fclose(input);
 	fclose(genome);
 
-	input = fopen("C:\\Users\\tea\\Documents\\Visual Studio 2010\\Projects\\NoviRabinKarp\\NoviRabinKarp\\Test_file_1.txt", "r");
-	genome = fopen("C:\\Users\\tea\\Documents\\Visual Studio 2010\\Projects\\NoviRabinKarp\\NoviRabinKarp\\new.txt", "r");
+	errnum = fopen_s(&input, "Test_file_2.txt", "r");
+	errnum = fopen_s(&genome, "new.txt", "r");
 
-	if (genome == NULL || input == NULL){
-		errnum = errno;
-		fprintf(stderr, "Error opening file: %s\n", strerror(errnum));
+	if (errnum){
+		printf("Error opening file.\n");
 		getchar();
 		return 0;
 	}
@@ -79,7 +77,7 @@ int main(){
 	num_patterns = 0;
 	lpattern = 0;
 
-	fscanf(input, "%d %d", &num_patterns, &lpattern);
+	fscanf_s(input, "%d %d", &num_patterns, &lpattern);
 	fgets(buffer, N, input);
 	fgets(buffer, N, input);
 
@@ -94,12 +92,12 @@ int main(){
 
 	fclose(input);
 
-	time(&end);
-	dif = difftime(end, start);
+	end = clock();
+	dif = ((double)(end - start)) / CLOCKS_PER_SEC;
 
-	printf("Processing input data took %.2lf seconds.\n", dif);
+	printf("Processing input data took %.2lf ms.\n", dif*1000);
 
-	time(&start);
+	start = clock();
 
 	result = (int *)malloc(num_patterns*sizeof(int));
 	hpattern = (long *)malloc(num_patterns*sizeof(long));
@@ -151,8 +149,8 @@ int main(){
 		}
 	}
 
-	time(&end);
-	dif = difftime(end, start);
+	end = clock();
+	dif = ((double)(end - start)) / CLOCKS_PER_SEC;
 
 	if (detectedHash)
 		efficiency = ((float)correctHash / detectedHash) * 100;
@@ -160,7 +158,7 @@ int main(){
 		efficiency = 0;
 
 	printf("\nDetected: %d\nCorrect: %d\nEfficiency: %.2f %%\n", detectedHash, correctHash, efficiency);
-	printf("Calculations took %.2lf seconds to run.\n", dif);
+	printf("Calculations took %.2lf ms.\n", dif*1000);
 
 	fclose(genome);
 	free(result);
