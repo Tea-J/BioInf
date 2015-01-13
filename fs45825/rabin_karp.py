@@ -3,7 +3,6 @@ __author__ = 'sina'
 import sys
 import os
 import time
-from Bio import SeqIO
 
 def openFile(argv):
 
@@ -15,7 +14,6 @@ def openFile(argv):
         sequenceData = "".join(line.rstrip() for line in sequenceFile if (line.startswith(">") != True))
     sequenceFile.close()
     return (genomeData, sequenceData)
-
 
 def robinKarpAlgorithm(genomeData, sequenceData):
     n = len(genomeData)
