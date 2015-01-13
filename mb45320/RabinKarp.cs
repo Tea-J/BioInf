@@ -10,9 +10,19 @@ namespace Bioinformatika
 {
     static class RabinKarp
     {
+        /// <summary>
+        /// Prime number base used to disperse hashes.
+        /// </summary>
         const ulong BASE = 11;
+        /// <summary>
+        /// Hash space limit.
+        /// </summary>
         const ulong HASH_SIZE = (2 << 20);
 
+        /// <summary>
+        /// Entry point for the program. It receives genome and pattern file paths, reads them if it is possible and then starts the Rabin-Karp algorithm.
+        /// </summary>
+        /// <param name="args">Command line arguments.</param>
         public static void Main(string[] args)
         {
             const int NUMBER_OF_INPUT_ARGUMENTS = 2;
@@ -121,6 +131,11 @@ namespace Bioinformatika
             StartMultipleSearch(genome, patterns);
         }
 
+        /// <summary>
+        /// Method used to search for multiple patterns in the specified genome.
+        /// </summary>
+        /// <param name="genome">Genome.</param>
+        /// <param name="patterns">Patterns to be searched.</param>
         private static void StartMultipleSearch(string genome, string[] patterns)
         {
             if (patterns.Contains(null))
@@ -138,6 +153,11 @@ namespace Bioinformatika
             Console.ReadKey();
         }
 
+        /// <summary>
+        /// Method used to search same-sized patterns.
+        /// </summary>
+        /// <param name="genome">Genome.</param>
+        /// <param name="patterns">Patterns.</param>
         private static void SearchGroup(string genome, string[] patterns)
         {
             var instances = SearchMultiple(genome, patterns);
@@ -161,6 +181,11 @@ namespace Bioinformatika
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// Method used to read the genome from the specified file.
+        /// </summary>
+        /// <param name="filePath">File path.</param>
+        /// <returns>Genome string.</returns>
         private static string ReadGenomeFromFile(string filePath)
         {
             return File.ReadAllText(filePath);
@@ -185,6 +210,11 @@ namespace Bioinformatika
             //return genome;
         }
 
+        /// <summary>
+        /// Method used to read patterns from the specified file.
+        /// </summary>
+        /// <param name="filePath">File path.</param>
+        /// <returns>An array of patterns.</returns>
         private static string[] ReadPatternsFromFile(string filePath)
         {
             var patterns = new List<string>();
@@ -281,6 +311,12 @@ namespace Bioinformatika
             return patternInstances;
         }
 
+        /// <summary>
+        /// Method used to start a Rabin-Karp algorithm search. The specified genome is checked for any appearences of the pattern.
+        /// </summary>
+        /// <param name="genome">Genome.</param>
+        /// <param name="pattern">Pattern.</param>
+        /// <returns>A list containing pattern instance indices.</returns>
         private static List<int> Search(string genome, string pattern)
         {
             if (ReferenceEquals(genome, null))
@@ -350,8 +386,18 @@ namespace Bioinformatika
             return patternInstances;
         }
 
+        /// <summary>
+        /// Used to count hash collision when the pattern is not a substring of the genome.
+        /// </summary>
         static ulong falsePositive = 0;
 
+        /// <summary>
+        /// Method used to check whether the specified pattern really is a substring of the gneome in case of a hash collision.
+        /// </summary>
+        /// <param name="genome">Genome.</param>
+        /// <param name="pattern">Pattern.</param>
+        /// <param name="index">Substring index within the genome.</param>
+        /// <returns>true if the specified pattern is a substring ot the genome; otherwise, false.</returns>
         private static bool IsSubstring(string genome, string pattern, int index)
         {
             for (int i = 0; i < pattern.Length; i++)
@@ -363,6 +409,14 @@ namespace Bioinformatika
             return true;
         }
 
+        /// <summary>
+        /// Method used to caclulate initial genome and pattern hashes in the single search variant of the algorithm.
+        /// </summary>
+        /// <param name="genome">Genome.</param>
+        /// <param name="patterns">Pattern searched for in the genome.</param>
+        /// <param name="patternSize">Pattern length.</param>
+        /// <param name="pBase">Prime number base used to dispese hashes.</param>
+        /// <returns>A tuple contaning the initial hashes.</returns>
         private static Tuple<ulong, ulong> CalculateInitialHash(string genome, string pattern, ulong patternSize, ulong pBase)
         {
             ulong genomeHash = 0;
@@ -376,6 +430,14 @@ namespace Bioinformatika
             return new Tuple<ulong, ulong>(genomeHash, patternHash);
         }
 
+        /// <summary>
+        /// Method used to caclulate initial genome and pattern hashes in the multiple search variant of the algorithm.
+        /// </summary>
+        /// <param name="genome">Genome.</param>
+        /// <param name="patterns">Patterns searched for in the genome.</param>
+        /// <param name="patternSize">Pattern length.</param>
+        /// <param name="pBase">Prime number base used to dispese hashes.</param>
+        /// <returns>A tuple contaning the initial hashes.</returns>
         private static Tuple<ulong, ulong[]> CalculateInitialHash(string genome, string[] patterns, ulong patternSize, ulong pBase)
         {
             ulong genomeHash = 0;
@@ -393,6 +455,11 @@ namespace Bioinformatika
             return new Tuple<ulong, ulong[]>(genomeHash, patternHashes);
         }
 
+        /// <summary>
+        /// Method used to create and initialize return lists containing indices of pattern instances within the genome.
+        /// </summary>
+        /// <param name="numberOfPatterns">Number of patterns.</param>
+        /// <returns>Lists used to store pattern instance indices.</returns>
         private static List<int>[] CreateReturnLists(int numberOfPatterns)
         {
             var returnLists = new List<int>[numberOfPatterns];
@@ -401,6 +468,12 @@ namespace Bioinformatika
             return returnLists;
         }
 
+        /// <summary>
+        /// Method used to create the factor used in Rubin-Karp algorithm during the rolling hash calculation.
+        /// </summary>
+        /// <param name="patternSize">Pattern length.</param>
+        /// <param name="pBase">Prime number base used to disperse hashes.</param>
+        /// <returns>Factor used to calculate the rolling hash.</returns>
         private static ulong CalculateFactor(ulong patternSize, ulong pBase)
         {
             ulong power = 1;
