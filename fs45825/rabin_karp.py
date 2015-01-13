@@ -59,6 +59,7 @@ if __name__ == "__main__":
     #    print ("Podniz veci od niza!!!")
 
 
+
     start = time.time()
     genomeData, sequenceData = openFile(sys.argv[1:])
     end = time.time()
