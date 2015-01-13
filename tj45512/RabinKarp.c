@@ -9,7 +9,8 @@
 
 #define N 80
 
-int detectedHash, correctHash = 0;
+int detectedHash = 0;
+int correctHash = 0;
 
 
 int Ascii(char c){
@@ -25,10 +26,10 @@ int Check(char *A, char *B){
 
 
 int main(){
-	FILE *genome; 
+	FILE *genome; FILE *input;
 	int i, j, lbuffer, offset, errnum;
 	char oldbyte, newbyte;
-	char *string;
+	//char *string;
 	char *substring;
 	int *result;
 	int num_patterns = 4;
@@ -38,52 +39,58 @@ int main(){
 	char *buffer;
 	long *hpattern;
 
-	char *patterns[] = { "CGACTTTTGT", "TAATATGCAA", "TTTCAGCCTT", "ACGTGCCAGA" };
+	char *patterns[] = { "TGAAACATGG", "CAGGAAAGGT", "TTTCAGCCTT", "GCCTCTGAGC" };
 
 	time_t start, end;
 	double dif;
 	
-	genome = fopen("C:\\Users\\tea\\Documents\\Visual Studio 2010\\Projects\\NoviRabinKarp\\NoviRabinKarp\\input.txt", "r");
+	input = fopen("C:\\Users\\tea\\Documents\\Visual Studio 2010\\Projects\\Rabin-Karp in C\\Rabin-Karp in C\\Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa", "r");
+	genome = fopen("C:\\Users\\tea\\Documents\\Visual Studio 2010\\Projects\\NoviRabinKarp\\NoviRabinKarp\\new.txt", "w");
 	
-	if (genome == NULL){
+	if (genome == NULL || input == NULL){
 		errnum = errno;
 		fprintf(stderr, "Error opening file: %s\n", strerror( errnum ));
 		getchar();
 		return 0;
 	}
 	
-	result = (int *)malloc(num_patterns*sizeof(int));
-	substring = (char *)malloc(lpattern*sizeof(char));
-	buffer = (char *)malloc(N*sizeof(char));
-
-	for (i=0; i<num_patterns; i++)
-		*(result+i) = 0;
-
-	
 	time(&start);
+
+	buffer = (char *)malloc(N*sizeof(char));
 	
-	//ucitaj file u string
+	while (fgets(buffer, N, input)){
+		if (*buffer == '>')
+			continue;
+		fwrite(buffer, sizeof(char), strlen(buffer)-1, genome);
+	}
+	fwrite("\0", sizeof(char), 1, genome);
+
+	fclose(input);
+	fclose(genome);
+
+	genome = fopen("C:\\Users\\tea\\Documents\\Visual Studio 2010\\Projects\\NoviRabinKarp\\NoviRabinKarp\\new.txt", "r");
 	fseek(genome, 0, SEEK_END);
 	input_file_size = ftell(genome);
 	rewind(genome);
-	fgets(buffer, N, genome);
-	offset=ftell(genome);
-	string = (char*)malloc((input_file_size-offset+1) * (sizeof(char)));
-	memset(string, '\0', input_file_size-offset+1);
-	fread(string, sizeof(char), input_file_size-offset+1, genome);
-	fclose(genome);
+
+	
+	//input = fopen("C:\\Users\\tea\\Documents\\Visual Studio 2010\\Projects\\NoviRabinKarp\\NoviRabinKarp\\Test_file_1.txt", "r");
 
 	time(&end);
 	dif = difftime(end, start);
 
-	printf("Processing input file took %.2lf seconds.\n", dif);
+	printf("Processing input data took %.2lf seconds.\n", dif);
 	
-
+	
 	time(&start);
 
+	result = (int *)malloc(num_patterns*sizeof(int));
 	hpattern = (long *)malloc(num_patterns*sizeof(long));
+	substring = (char *)malloc(lpattern*sizeof(char));
+	
 	for(i = 0; i < num_patterns; i++) {
 		strncpy_s(substring, lpattern+1, *(patterns+i), lpattern);
+		*(result+i) = 0;
 		*(hpattern+i) = 0;
 		for(j=0; j<lpattern; j++){
 			*(hpattern+i) += *(substring+j) * (lpattern-j);
@@ -91,12 +98,16 @@ int main(){
 		//printf("za pattern %d hash je %d\n", i, *(hpattern+i));
 	}
 	
+
 	hsubstring = 0;
 	sub_sum = 0;
 	oldbyte = 0;
 
-	for (i = 0; i<strlen(string)-lpattern+1;i++){
-		strncpy_s(substring, lpattern+1, string+i, lpattern);
+	for( i= 0; i<input_file_size-lpattern+1;i++){
+		fread(substring, sizeof(char), lpattern, genome);
+		offset=ftell(genome);
+		rewind(genome);
+		fseek( genome, offset-lpattern+1, SEEK_SET );
 			
 		if(!oldbyte){
 			for(j=0; j<lpattern; j++){
@@ -134,10 +145,16 @@ int main(){
 	else
 		efficiency = 0;
 
-	printf("\nDetected: %d\nCorrect: %d\nEfficiency: %.2f %\n", detectedHash, correctHash, efficiency);
+	printf("\nDetected: %d\nCorrect: %d\nEfficiency: %.2f %%\n", detectedHash, correctHash, efficiency);
 	printf ("Calculations took %.2lf seconds to run.\n", dif );
 	
+	fclose(genome);
 	//free(string);
+	free(result);
+	//free(substring);
+	free(buffer);
+	free(hpattern);
+	
 	getchar();
 	return 0;
 }
