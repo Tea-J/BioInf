@@ -9,7 +9,8 @@
 
 #define N 80
 
-int detectedHash, correctHash = 0;
+int detectedHash = 0;
+int correctHash = 0;
 
 
 int Ascii(char c){
@@ -17,7 +18,7 @@ int Ascii(char c){
 }
 
 int Check(char *A, char *B){
-	if( strcmp(A, B) == 0 )
+	if (strcmp(A, B) == 0)
 		return 1;	//Strings are equal
 	else
 		return 0;	//Strings are not equal
@@ -25,119 +26,147 @@ int Check(char *A, char *B){
 
 
 int main(){
-	FILE *genome; 
-	int i, j, lbuffer, offset, errnum;
-	char oldbyte, newbyte;
-	char *string;
-	char *substring;
+	FILE *genome; FILE *input;
+	int i, j, lbuffer, offset, num_patterns, lpattern, errnum;
 	int *result;
-	int num_patterns = 4;
-	int lpattern = 10;
-	float efficiency;
+	char oldbyte, newbyte;
+	char *substring, *buffer, *patterns;
 	long input_file_size, hsubstring, sub_sum;
-	char *buffer;
 	long *hpattern;
-
-	char *patterns[] = { "CGACTTTTGT", "TAATATGCAA", "TTTCAGCCTT", "ACGTGCCAGA" };
+	float efficiency;
 
 	time_t start, end;
 	double dif;
-	
-	genome = fopen("C:\\Users\\tea\\Documents\\Visual Studio 2010\\Projects\\NoviRabinKarp\\NoviRabinKarp\\input.txt", "r");
-	
-	if (genome == NULL){
-		errnum = errno;
-		fprintf(stderr, "Error opening file: %s\n", strerror( errnum ));
+
+	errnum = fopen_s(&input, "Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa", "r");
+	errnum = fopen_s(&genome, "new.txt", "w");
+
+	if (errnum){
+		printf("Error opening file.\n");
 		getchar();
 		return 0;
 	}
-	
-	result = (int *)malloc(num_patterns*sizeof(int));
-	substring = (char *)malloc(lpattern*sizeof(char));
+
+	start = clock();
+
 	buffer = (char *)malloc(N*sizeof(char));
 
-	for (i=0; i<num_patterns; i++)
-		*(result+i) = 0;
+	while (fgets(buffer, N, input)){
+		if (*buffer == '>')
+			continue;
+		fwrite(buffer, sizeof(char), strlen(buffer) - 1, genome);
+	}
+	fwrite("\0", sizeof(char), 1, genome);
 
-	
-	time(&start);
-	
-	//ucitaj file u string
+	fclose(input);
+	fclose(genome);
+
+	errnum = fopen_s(&input, "Test_file_2.txt", "r");
+	errnum = fopen_s(&genome, "new.txt", "r");
+
+	if (errnum){
+		printf("Error opening file.\n");
+		getchar();
+		return 0;
+	}
+
 	fseek(genome, 0, SEEK_END);
 	input_file_size = ftell(genome);
 	rewind(genome);
-	fgets(buffer, N, genome);
-	offset=ftell(genome);
-	string = (char*)malloc((input_file_size-offset+1) * (sizeof(char)));
-	memset(string, '\0', input_file_size-offset+1);
-	fread(string, sizeof(char), input_file_size-offset+1, genome);
-	fclose(genome);
 
-	time(&end);
-	dif = difftime(end, start);
+	num_patterns = 0;
+	lpattern = 0;
 
-	printf("Processing input file took %.2lf seconds.\n", dif);
-	
+	fscanf_s(input, "%d %d", &num_patterns, &lpattern);
+	fgets(buffer, N, input);
+	fgets(buffer, N, input);
 
-	time(&start);
+	patterns = (char *)malloc(num_patterns*(lpattern + 1)*sizeof(char));
+	buffer = (char *)realloc(buffer, (lpattern + N)*sizeof(char));
+	memset(buffer, '\0', (lpattern + N)*sizeof(char));
 
-	hpattern = (long *)malloc(num_patterns*sizeof(long));
-	for(i = 0; i < num_patterns; i++) {
-		strncpy_s(substring, lpattern+1, *(patterns+i), lpattern);
-		*(hpattern+i) = 0;
-		for(j=0; j<lpattern; j++){
-			*(hpattern+i) += *(substring+j) * (lpattern-j);
-		}
-		//printf("za pattern %d hash je %d\n", i, *(hpattern+i));
+	for (i = 0; i < num_patterns; i++){
+		fgets(buffer, (lpattern + N)*sizeof(char), input);
+		strncpy_s(patterns + i*lpattern, lpattern + 1, buffer, lpattern);
 	}
-	
+
+	fclose(input);
+
+	end = clock();
+	dif = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+	printf("Processing input data took %.2lf ms.\n", dif*1000);
+
+	start = clock();
+
+	result = (int *)malloc(num_patterns*sizeof(int));
+	hpattern = (long *)malloc(num_patterns*sizeof(long));
+	substring = (char *)malloc(lpattern*sizeof(char));
+
+	for (i = 0; i < num_patterns; i++) {
+		strncpy_s(substring, lpattern + 1, patterns + i*lpattern, lpattern);
+		*(result + i) = 0;
+		*(hpattern + i) = 0;
+		for (j = 0; j < lpattern; j++){
+			*(hpattern + i) += *(substring + j) * (lpattern - j);
+		}
+	}
+
 	hsubstring = 0;
 	sub_sum = 0;
 	oldbyte = 0;
 
-	for (i = 0; i<strlen(string)-lpattern+1;i++){
-		strncpy_s(substring, lpattern+1, string+i, lpattern);
-			
-		if(!oldbyte){
-			for(j=0; j<lpattern; j++){
-				hsubstring += *(substring+j) * (lpattern-j);
+	for (i = 0; i < input_file_size - lpattern + 1; i++){
+		fread(substring, sizeof(char), lpattern, genome);
+		offset = ftell(genome);
+		rewind(genome);
+		fseek(genome, offset - lpattern + 1, SEEK_SET);
+
+		if (!oldbyte){
+			for (j = 0; j < lpattern; j++){
+				hsubstring += *(substring + j) * (lpattern - j);
 				sub_sum += Ascii(*(substring + j));
 			}
 		}
 		else{
-			newbyte = *(substring + lpattern -1);
+			newbyte = *(substring + lpattern - 1);
 			sub_sum = sub_sum - Ascii(oldbyte) + Ascii(newbyte);
 			hsubstring = hsubstring + sub_sum - lpattern*Ascii(oldbyte);
 		}
 		oldbyte = *substring;
 
-		//printf("vrijednost hasha za %d.substring: %d\n", i, hsubstring);
-
 		for (j = 0; j < num_patterns; j++){
-			if (hsubstring == *(hpattern+j)){
+			if (hsubstring == *(hpattern + j)){
 				detectedHash++;
-				*(result+j) = Check(substring, patterns[j]);
+				strncpy_s(buffer, lpattern + 1, patterns + j*lpattern, lpattern);
+				*(result + j) = Check(substring, buffer);
 			}
-			if (*(result+j)){
+			if (*(result + j)){
 				correctHash++;
 				printf("%d. substring found at index %d.\n", j, i);
-				*(result+j)=0;
+				*(result + j) = 0;
 			}
 		}
 	}
-	
-	time(&end);
-	dif = difftime(end, start);
-	
+
+	end = clock();
+	dif = ((double)(end - start)) / CLOCKS_PER_SEC;
+
 	if (detectedHash)
-		efficiency = (correctHash/detectedHash)*100;
+		efficiency = ((float)correctHash / detectedHash) * 100;
 	else
 		efficiency = 0;
 
-	printf("\nDetected: %d\nCorrect: %d\nEfficiency: %.2f %\n", detectedHash, correctHash, efficiency);
-	printf ("Calculations took %.2lf seconds to run.\n", dif );
-	
-	//free(string);
+	printf("\nDetected: %d\nCorrect: %d\nEfficiency: %.2f %%\n", detectedHash, correctHash, efficiency);
+	printf("Calculations took %.2lf ms.\n", dif*1000);
+
+	fclose(genome);
+	free(result);
+	free(buffer);
+	free(patterns);
+	free(hpattern);
+	//free(substring);
+
 	getchar();
 	return 0;
 }
