@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 /**
+ * Rabin Karp algoritam pretrage stringa s više ulaznih nizeva 
+ * 
  * @author Matija Petanjek
  */
 public class RabinKarp {
@@ -59,14 +61,24 @@ public class RabinKarp {
 						textHash-=h*textArray[i];
 						while(textHash<0)
 							textHash += modValue;
-						textHash = (charMaxValue * textHash + textArray[i + patternLength]) % modValue; // veæ smo izraèunali za prvi patternlength
+						textHash = (charMaxValue * textHash + textArray[i + patternLength]) % modValue; 
 					}
 				}
 			}
 			indexOfMatches.add(indexOfMatch);
 		}
-		rabinKarp.printResult(textArray, indexOfMatches);
+		rabinKarp.printResult(indexOfMatches);
 	}
+	
+	/**
+	 * Metoda compare usporeðuje dva niza nakon što smo ustanovili da su
+	 * im hash kodovi jednaki, kako bi potvrdili da nije rijeè o false positive sluèaju
+	 * 
+	 * @param text 		podniz iz genom.fa 
+	 * @param start    	poèetni index podniza u genom.fa 
+	 * @param pattern   niz iz pattern.txt
+	 * @return			vraæa true ako su nizevi jednaki, inaèe false 
+	 */
 	
 	private boolean compare(char[] text, int start, char[] pattern) {
         if (text.length - start < pattern.length)
@@ -77,6 +89,15 @@ public class RabinKarp {
         return true;
     }
 	
+	/**
+	 * Metoda powMod raèuna vrijednost za odbacivanje zadnjeg 
+	 * znaka iz podniza textArray
+	 *
+	 * @param d
+	 * @param n
+	 * @param q
+	 * @return d^n mod q
+	 */
 	private long powMod(long d, long n, long q) {
         if (n == 0)
             return 1;
@@ -89,7 +110,13 @@ public class RabinKarp {
         return ((temp * d) % q);
 	}
 	
-	private void printResult (char[] textArray, LinkedList<LinkedList<Integer>> indexOfMatches)
+	/**
+	 * Metoda printResult u result.txt file ispisuje poèetne indexe 
+	 * preklapanja ulaznih nizeva iz pattern.txt i genoma iz genom.fa
+	 * 
+	 * @param indexOfMatches
+	 */
+	private void printResult (LinkedList<LinkedList<Integer>> indexOfMatches)
 	{
 		int patternNumber = 1;
 		try {
@@ -127,6 +154,14 @@ public class RabinKarp {
 		}
 	}
 	
+	/**
+	 * Metoda readPatternFile uèitava iz file-a ulazni niz u polje 
+	 * char-ova, a zatim polje dodaje u LinkedList-u, i tako za svaki ulazni niz
+	 * 
+	 * @param workingDirectory	put do file-a
+	 * @param string			ime file-a
+	 * @return 					Linked List-u koja sadrži polja charova ulaznih nizeva
+	 */
 	private LinkedList<char[]> readPatternFile(String workingDirectory, String string)
 	{
 		LinkedList<char[]> ListOfCharArrays = new LinkedList<char[]>();
@@ -163,6 +198,12 @@ public class RabinKarp {
 		return ListOfCharArrays;
 	}
 	
+	/**
+	 * Metoda readTextFile uèitava cijeli genom u polje charova
+	 * @param workingDirectory	put do file-a
+	 * @param string			ime file-a
+	 * @return					polje charova sastavljeno od genoma
+	 */
 	private char[] readTextFile(String workingDirectory, String string)
 	{
 		char[] charArray = null;
