@@ -25,9 +25,10 @@ int Check(char *A, char *B){
 }
 
 
-int main(){
+int main(int argc, char *argv[]){
 	FILE *genome; FILE *input;
-	int i, j, no_results, num_patterns, lpattern;
+	int i, j, no_results, lpattern;
+	int num_patterns = 10;
 	int *result;
 	char oldbyte, newbyte;
 	char *substring, *buffer, *patterns, *string;
@@ -38,11 +39,17 @@ int main(){
 	time_t start, end;
 	double dif;
 
+	if (argc != 2){
+		fprintf(stderr, "Usage: RabinKarp [-n]\n-n	  test file index [1-5]\n");
+		getchar();
+		return 0;
+	}
+
 	input = fopen("Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa", "r");
 	genome = fopen("new.txt", "w");
 
 	if (input == NULL || genome == NULL){
-		printf("Error opening file.\n");
+		fprintf(stderr, "Error opening file.\n");
 		getchar();
 		return 0;
 	}
@@ -62,11 +69,38 @@ int main(){
 	fclose(input);
 	fclose(genome);
 
-	input = fopen("Test_file_1.txt", "r");
+	switch (*argv[argc-1]){
+	case '1': 
+		input = fopen("10patterns100size.fa", "r");
+		lpattern = 100;
+		break;
+	case '2':
+		input = fopen("10patterns1000size.fa", "r");
+		lpattern = 1000;
+		break;
+	case '3':
+		input = fopen("10patterns10000size.fa", "r");
+		lpattern = 10000;
+		break;
+	case '4':
+		input = fopen("10patterns100000size.fa", "r");
+		lpattern = 100000;
+		break;
+	case '5':
+		input = fopen("10patterns1000000size.fa", "r");
+		lpattern = 1000000;
+		break;
+	default:
+		fprintf(stderr, "Unallowed argumen.\n");
+		fprintf(stderr, "Usage: RabinKarp [-n]\n-n test file index [1-5]\n");
+		getchar();
+		return 0;
+	}
+	
 	genome = fopen("new.txt", "r");
 
 	if (input == NULL || genome == NULL){
-		printf("Error opening file.\n");
+		fprintf(stderr, "Error opening file.\n");
 		getchar();
 		return 0;
 	}
@@ -75,21 +109,14 @@ int main(){
 	input_file_size = ftell(genome);
 	rewind(genome);
 
-	//Reading patterns from test files
-	num_patterns = 0;
-	lpattern = 0;
-
-	fscanf(input, "%d %d", &num_patterns, &lpattern);
-	fgets(buffer, N, input);
-	fgets(buffer, N, input);
-
 	patterns = (char *)malloc(num_patterns*(lpattern + 1)*sizeof(char));
 	buffer = (char *)realloc(buffer, (lpattern + N)*sizeof(char));
 
 	for (i = 0; i < num_patterns; i++){
+		fgets(buffer, (lpattern + N)*sizeof(char), input);	//Reads comment line
 		memset(buffer, '\0', (lpattern + N)*sizeof(char));
-		fgets(buffer, (lpattern + N)*sizeof(char), input);
-		strncpy(patterns + i*lpattern, buffer, lpattern);
+		fgets(buffer, (lpattern + N)*sizeof(char), input);	//Reads pattern
+		strncpy(patterns + i*lpattern, buffer, lpattern);	//Saves pattern
 	}
 
 	fclose(input);
@@ -97,7 +124,7 @@ int main(){
 	end = clock();
 	dif = ((double)(end - start)) / CLOCKS_PER_SEC;
 
-	printf("Processing input data took %.2lf ms.\n", dif * 1000);
+	fprintf(stderr, "Processing input data took %.2lf ms.\n", dif * 1000);
 
 	start = clock();
 
@@ -105,7 +132,7 @@ int main(){
 	hpattern = (long *)malloc(num_patterns*sizeof(long));
 	substring = (char *)malloc((lpattern+1)*sizeof(char));
 
-	//Calculating hasg values for patterns
+	//Calculating hash values for patterns
 	for (i = 0; i < num_patterns; i++) {
 		memset(substring, '\0', (lpattern + 1)*sizeof(char));
 		strncpy(substring, patterns + i*lpattern, lpattern);
@@ -154,7 +181,7 @@ int main(){
 
 			if (*(result + j)){
 				correctHash++;
-				printf("%d. pattern found at index %d.\n", j, i);
+				fprintf(stderr, "%d. pattern found at index %d.\n", j, i);
 				*(result + j) = 0;
 
 				if (no_results)
@@ -164,7 +191,7 @@ int main(){
 	}
 
 	if (no_results)
-		printf("No pattern was found.\n");
+		fprintf(stderr, "No pattern was found.\n");
 
 	end = clock();
 	dif = ((double)(end - start)) / CLOCKS_PER_SEC;
@@ -174,8 +201,8 @@ int main(){
 	else
 		efficiency = 0;
 
-	printf("\nDetected: %d\nCorrect: %d\nEfficiency: %.2f %%\n", detectedHash, correctHash, efficiency);
-	printf("Calculations took %.2lf ms.\n", dif * 1000);
+	fprintf(stderr, "\nDetected: %d\nCorrect: %d\nEfficiency: %.2f %%\n", detectedHash, correctHash, efficiency);
+	fprintf(stderr, "Calculations took %.2lf ms.\n", dif * 1000);
 
 	fclose(genome);
 	free(result);
