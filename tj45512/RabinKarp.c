@@ -31,21 +31,21 @@ int main(int argc, char *argv[]){
 	int num_patterns = 10;
 	int *result;
 	char oldbyte, newbyte;
-	char *substring, *buffer, *patterns, *string;
+	char *substring, *buffer, *patterns, *string, *size;
 	long input_file_size, hsubstring, sub_sum;
 	long *hpattern;
 	float efficiency;
 
 	time_t start, end;
 	double dif;
-
-	if (argc != 2){
-		fprintf(stderr, "Usage: RabinKarp [-n]\n-n	  test file index [1-5]\n");
+	
+	if (argc != 3){
+		fprintf(stderr, "Usage: RabinKarp [genome.fa] [patterns.fa]\n");
 		getchar();
 		return 0;
 	}
-
-	input = fopen("Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa", "r");
+	
+	input = fopen(argv[1], "r");
 	genome = fopen("new.txt", "w");
 
 	if (input == NULL || genome == NULL){
@@ -69,34 +69,7 @@ int main(int argc, char *argv[]){
 	fclose(input);
 	fclose(genome);
 
-	switch (*argv[argc-1]){
-	case '1': 
-		input = fopen("10patterns100size.fa", "r");
-		lpattern = 100;
-		break;
-	case '2':
-		input = fopen("10patterns1000size.fa", "r");
-		lpattern = 1000;
-		break;
-	case '3':
-		input = fopen("10patterns10000size.fa", "r");
-		lpattern = 10000;
-		break;
-	case '4':
-		input = fopen("10patterns100000size.fa", "r");
-		lpattern = 100000;
-		break;
-	case '5':
-		input = fopen("10patterns1000000size.fa", "r");
-		lpattern = 1000000;
-		break;
-	default:
-		fprintf(stderr, "Unallowed argumen.\n");
-		fprintf(stderr, "Usage: RabinKarp [-n]\n-n test file index [1-5]\n");
-		getchar();
-		return 0;
-	}
-	
+	input = fopen(argv[2], "r");	
 	genome = fopen("new.txt", "r");
 
 	if (input == NULL || genome == NULL){
@@ -109,6 +82,24 @@ int main(int argc, char *argv[]){
 	input_file_size = ftell(genome);
 	rewind(genome);
 
+	size = (char *)malloc(N*sizeof(char));
+	memset(size, '\0', N*sizeof(char));
+
+	i = 0;
+	while ((j = fgetc(input)) != '\n'){
+        	if (j == ','){
+			fgetc(input);	//Read space
+			while ((j = fgetc(input)) != ' '){
+				*(size+i) = j;
+				i++;
+			}
+			break;
+		}
+	}
+
+	rewind(input);
+	lpattern = atoi(size);
+	
 	patterns = (char *)malloc(num_patterns*(lpattern + 1)*sizeof(char));
 	buffer = (char *)realloc(buffer, (lpattern + N)*sizeof(char));
 
