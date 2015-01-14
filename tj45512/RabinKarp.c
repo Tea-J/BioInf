@@ -27,10 +27,10 @@ int Check(char *A, char *B){
 
 int main(){
 	FILE *genome; FILE *input;
-	int i, j, lbuffer, offset, num_patterns, lpattern, errnum;
+	int i, j, no_results, num_patterns, lpattern;
 	int *result;
 	char oldbyte, newbyte;
-	char *substring, *buffer, *patterns;
+	char *substring, *buffer, *patterns, *string;
 	long input_file_size, hsubstring, sub_sum;
 	long *hpattern;
 	float efficiency;
@@ -38,10 +38,10 @@ int main(){
 	time_t start, end;
 	double dif;
 
-	errnum = fopen_s(&input, "Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa", "r");
-	errnum = fopen_s(&genome, "new.txt", "w");
+	input = fopen("Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel.fa", "r");
+	genome = fopen("new.txt", "w");
 
-	if (errnum){
+	if (input == NULL || genome == NULL){
 		printf("Error opening file.\n");
 		getchar();
 		return 0;
@@ -51,6 +51,7 @@ int main(){
 
 	buffer = (char *)malloc(N*sizeof(char));
 
+	//Saving data to a new file, without comments or blank spaces
 	while (fgets(buffer, N, input)){
 		if (*buffer == '>')
 			continue;
@@ -61,10 +62,10 @@ int main(){
 	fclose(input);
 	fclose(genome);
 
-	errnum = fopen_s(&input, "Test_file_2.txt", "r");
-	errnum = fopen_s(&genome, "new.txt", "r");
+	input = fopen("Test_file_1.txt", "r");
+	genome = fopen("new.txt", "r");
 
-	if (errnum){
+	if (input == NULL || genome == NULL){
 		printf("Error opening file.\n");
 		getchar();
 		return 0;
@@ -74,20 +75,21 @@ int main(){
 	input_file_size = ftell(genome);
 	rewind(genome);
 
+	//Reading patterns from test files
 	num_patterns = 0;
 	lpattern = 0;
 
-	fscanf_s(input, "%d %d", &num_patterns, &lpattern);
+	fscanf(input, "%d %d", &num_patterns, &lpattern);
 	fgets(buffer, N, input);
 	fgets(buffer, N, input);
 
 	patterns = (char *)malloc(num_patterns*(lpattern + 1)*sizeof(char));
 	buffer = (char *)realloc(buffer, (lpattern + N)*sizeof(char));
-	memset(buffer, '\0', (lpattern + N)*sizeof(char));
 
 	for (i = 0; i < num_patterns; i++){
+		memset(buffer, '\0', (lpattern + N)*sizeof(char));
 		fgets(buffer, (lpattern + N)*sizeof(char), input);
-		strncpy_s(patterns + i*lpattern, lpattern + 1, buffer, lpattern);
+		strncpy(patterns + i*lpattern, buffer, lpattern);
 	}
 
 	fclose(input);
@@ -95,16 +97,18 @@ int main(){
 	end = clock();
 	dif = ((double)(end - start)) / CLOCKS_PER_SEC;
 
-	printf("Processing input data took %.2lf ms.\n", dif*1000);
+	printf("Processing input data took %.2lf ms.\n", dif * 1000);
 
 	start = clock();
 
 	result = (int *)malloc(num_patterns*sizeof(int));
 	hpattern = (long *)malloc(num_patterns*sizeof(long));
-	substring = (char *)malloc(lpattern*sizeof(char));
+	substring = (char *)malloc((lpattern+1)*sizeof(char));
 
+	//Calculating hasg values for patterns
 	for (i = 0; i < num_patterns; i++) {
-		strncpy_s(substring, lpattern + 1, patterns + i*lpattern, lpattern);
+		memset(substring, '\0', (lpattern + 1)*sizeof(char));
+		strncpy(substring, patterns + i*lpattern, lpattern);
 		*(result + i) = 0;
 		*(hpattern + i) = 0;
 		for (j = 0; j < lpattern; j++){
@@ -115,13 +119,16 @@ int main(){
 	hsubstring = 0;
 	sub_sum = 0;
 	oldbyte = 0;
+	no_results = 1;
+	string = (char*)malloc(input_file_size*sizeof(char));
+	memset(string, '\0', input_file_size);
+	fread(string, sizeof(char), input_file_size, genome);
 
+	//Searchig for patterns in input data
 	for (i = 0; i < input_file_size - lpattern + 1; i++){
-		fread(substring, sizeof(char), lpattern, genome);
-		offset = ftell(genome);
-		rewind(genome);
-		fseek(genome, offset - lpattern + 1, SEEK_SET);
+		strncpy(substring, string + i, lpattern);
 
+		//Calculating hash value for a substring of input data
 		if (!oldbyte){
 			for (j = 0; j < lpattern; j++){
 				hsubstring += *(substring + j) * (lpattern - j);
@@ -135,19 +142,29 @@ int main(){
 		}
 		oldbyte = *substring;
 
+		//Comparing hash value of a substring with hash values of patterns
+		//If we find same hash values, we still have compare substring with pattern
 		for (j = 0; j < num_patterns; j++){
 			if (hsubstring == *(hpattern + j)){
 				detectedHash++;
-				strncpy_s(buffer, lpattern + 1, patterns + j*lpattern, lpattern);
+				memset(buffer, '\0', (lpattern + N)*sizeof(char));
+				strncpy(buffer, patterns + j*lpattern, lpattern);
 				*(result + j) = Check(substring, buffer);
 			}
+
 			if (*(result + j)){
 				correctHash++;
-				printf("%d. substring found at index %d.\n", j, i);
+				printf("%d. pattern found at index %d.\n", j, i);
 				*(result + j) = 0;
+
+				if (no_results)
+					no_results = 0;
 			}
 		}
 	}
+
+	if (no_results)
+		printf("No pattern was found.\n");
 
 	end = clock();
 	dif = ((double)(end - start)) / CLOCKS_PER_SEC;
@@ -158,7 +175,7 @@ int main(){
 		efficiency = 0;
 
 	printf("\nDetected: %d\nCorrect: %d\nEfficiency: %.2f %%\n", detectedHash, correctHash, efficiency);
-	printf("Calculations took %.2lf ms.\n", dif*1000);
+	printf("Calculations took %.2lf ms.\n", dif * 1000);
 
 	fclose(genome);
 	free(result);
