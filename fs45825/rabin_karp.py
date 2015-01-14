@@ -10,6 +10,7 @@ def openFile(argv):
     Fuction is responsible for reading two fasta files. First file is stored in one string, and second file,
     with multiple sequences, is stored in list of strings.
     '''
+
     with open (argv[0], "r") as genomeFile:
         genomeData = "".join(line.rstrip() for line in genomeFile if (line.startswith(">") != True))
     genomeFile.close()
