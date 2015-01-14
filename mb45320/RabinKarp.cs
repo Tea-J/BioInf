@@ -172,7 +172,7 @@ namespace Bioinformatika
             Console.WriteLine();
             Console.WriteLine("    False positives: {0} ", falsePositive);
             Console.WriteLine();
-            Console.WriteLine("    Accuracy: {0} %", ((patterns.Length / (patterns.Length - (int)falsePositive)) * 100));
+            Console.WriteLine("    Accuracy: {0} %", (((patterns.Length - (int)falsePositive)/patterns.Length) * 100));
         }
 
         /// <summary>
