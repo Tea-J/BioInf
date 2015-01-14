@@ -3,9 +3,13 @@ __author__ = 'sina'
 import sys
 import os
 import time
+import resource
 
 def openFile(argv):
-
+    '''
+    Fuction is responsible for reading two fasta files. First file is stored in one string, and second file,
+    with multiple sequences, is stored in list of strings.
+    '''
     with open (argv[0], "r") as genomeFile:
         genomeData = "".join(line.rstrip() for line in genomeFile if (line.startswith(">") != True))
     genomeFile.close()
@@ -40,6 +44,18 @@ def openFile(argv):
     return genomeData, sequenceData
 
 def robinKarpAlgorithm(genomeData, sequenceData):
+    '''
+    Function is responsible for finding sequences in genome. First it calculates sumHash and mulHash of all sequences.
+    In main for loop it goes through whole genom and calculates sumHash and mulHash of that part of the genom. If they
+    are equal than that part of genom is tested for equality with that sequence. It they are also equal then in list
+    result is stored current position in genom.
+    SumHash is sum of ASCII values of all letters in string. MulHash is also sum of ASCII values of all letters multiply
+    by a factor. First one with a factor length of string, second with that factor minus 1, and so on to the last factor
+    which is one.
+    In every iteration new sumHash is calculated by subtraction ASCII value of old letter and by adding ASCII letter
+    of new letter. MulHash is calculated by subtraction of ASCII value of old letter multiplied with factor length of
+    string and by adding current value of sumHash.
+    '''
     n = len(genomeData)
     m = len(sequenceData[0])
     k = len(sequenceData)
@@ -72,10 +88,16 @@ def robinKarpAlgorithm(genomeData, sequenceData):
             sumHash = sumHash - ord(genomeData[i]) + ord(genomeData[i + m])
             mulHash = mulHash - m*ord(genomeData[i]) + sumHash
 
-    return (result, broj)
 
+    print  (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    #+ sys.getsizeof(sumHash_pattern) + sys.getsizeof(mulHash_pattern)
+    #print ("Memory used: " + str(memory_size))
+    return result, broj
 
 if __name__ == "__main__":
+    '''
+    Program takes only two arguments. First one is the genom, second one are all sequences.
+    '''
     start = time.time()
     if(len(sys.argv) != 3):
         print ("Less arguments than needed!")
@@ -87,7 +109,7 @@ if __name__ == "__main__":
     genomeData, sequenceData = openFile(sys.argv[1:])
 
     result, broj= robinKarpAlgorithm(genomeData, sequenceData)
-
+    #print (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     #print ("broj: " + str(broj))
     #print ("result: " + str(result))
     for i in range(len(result), 0, -1):
