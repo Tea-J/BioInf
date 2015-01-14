@@ -100,6 +100,25 @@ Pattern start index 2914625, pattern num 8
 Pattern start index 3269817, pattern num 9 
 Pattern start index 3395785, pattern num 10  
 
+//with edited files
+Time elapsed for preparing and reading: 544 ms
+Time elapsed for init hash: 83860 us
+Used Memory: 26 Mb
+Time elapsed for algorithm: 322 ms
+Total time elapsed: 952 ms
+Matched patterns/Matched Hashes: 10/10 
+Hash efficiency: 1.000000 
+Pattern start index 607024, pattern num 1 
+Pattern start index 822207, pattern num 2 
+Pattern start index 841980, pattern num 3 
+Pattern start index 970724, pattern num 4 
+Pattern start index 1821427, pattern num 5 
+Pattern start index 1825271, pattern num 6 
+Pattern start index 2446212, pattern num 7 
+Pattern start index 2914625, pattern num 8 
+Pattern start index 3269817, pattern num 9 
+Pattern start index 3395785, pattern num 10
+
 
 
 Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel 10patternsDiffsize 

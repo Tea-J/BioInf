@@ -82,8 +82,10 @@ public class RabinKarp {
     void startRabinKarp() {
         long start = System.currentTimeMillis();
         long total = System.currentTimeMillis();
+        
         prepareFiles();
         readFiles();
+        
         long end = System.currentTimeMillis();
         System.out.println("Time elapsed for preparing and reading: " + (end - start) + " ms");
         start = System.nanoTime();
@@ -113,13 +115,15 @@ public class RabinKarp {
         System.out.println("Time elapsed for algorithm: " + (end - start) + " ms");
         System.out.println("Total time elapsed: " + (end - total) + " ms");
         System.out.format("Matched patterns/Matched Hashes: %d/%d \n", actualHits, hashHits);
-        System.out.format("Hash efficiency: %f \n", ((float) actualHits / hashHits));
+        System.out.format("Hash efficiency: %.2f", ((float) actualHits / hashHits)*100);
+        System.out.print("%\n");
 
         for (Point p : indexPatternHitList) {
             System.out.format("Pattern start index %d, pattern num %d \n", p.x, (p.y + 1));
         }
     }
 
+    // stores sequences as one line in new file with _edited attached without comments
     void prepareFiles() {
         String gP = genomePath.toString();
         int dot = gP.lastIndexOf('.');
@@ -229,7 +233,6 @@ public class RabinKarp {
         }
     }
 
-    // jos to provjeriti
     void runRabinKarpHasEqual() {
         int i = 0;
 
@@ -244,7 +247,6 @@ public class RabinKarp {
                         if (checkPattern(i, j)) {
                             actualHits++;
                             indexPatternHitList.add(new Point(i, j));
-                            //vrati odmah da ima ili broji kolko ih ima ili spremi pocetne indexe svakog ponavljanja
                         }
                     }
                 }
@@ -272,7 +274,6 @@ public class RabinKarp {
         int i = 0;
 
         //initHashDiff();
-        //TODO provjeravati za do min duljinu podniza i paziti da ove duze ne gledam pred kraj
         while (i < (genomeSize - minSequenceSize)) {
             for (int j = 0; j < sequanceHashList.size(); ++j) {
                 if (i <= genomeSize - sequenceDataList.get(j).length) {
