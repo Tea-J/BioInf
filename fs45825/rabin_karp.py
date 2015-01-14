@@ -34,11 +34,11 @@ def openFile(argv):
     n = len(sequenceData[0])
     for i in range(len(sequenceData)):
         if (len(sequenceData[i]) != n):
-            print ("Sequences of different sizes!")
+            print "Sequences of different sizes!"
             exit()
 
     if (n > len(genomeData)):
-        print ("Sequences are bigger than genom!")
+        print "Sequences are bigger than genom!"
         exit()
 
     return genomeData, sequenceData
@@ -62,7 +62,6 @@ def robinKarpAlgorithm(genomeData, sequenceData):
     result = []
     sumHash_pattern = []
     mulHash_pattern = []
-    broj = 0
     sumHash = 0
     mulHash = 0
 
@@ -81,18 +80,13 @@ def robinKarpAlgorithm(genomeData, sequenceData):
     for i in range(n - m + 1):
         for j in range(k):
             if((sumHash_pattern[j] == sumHash) and (mulHash_pattern[j] == mulHash)):
-                #broj += 1
                 if (str(sequenceData[j]) == str(genomeData[i:i+m])):
                     result.append([i,j])
         if i < n -m:
             sumHash = sumHash - ord(genomeData[i]) + ord(genomeData[i + m])
             mulHash = mulHash - m*ord(genomeData[i]) + sumHash
 
-
-    print  (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    #+ sys.getsizeof(sumHash_pattern) + sys.getsizeof(mulHash_pattern)
-    #print ("Memory used: " + str(memory_size))
-    return result, broj
+    return result
 
 if __name__ == "__main__":
     '''
@@ -100,19 +94,17 @@ if __name__ == "__main__":
     '''
     start = time.time()
     if(len(sys.argv) != 3):
-        print ("Less arguments than needed!")
+        print "Less arguments than needed!"
         exit()
     if((os.stat(sys.argv[1]).st_size == 0) or (os.stat(sys.argv[2]).st_size == 0)):
-        print ("Empty files!")
+        print "Empty files!"
         exit()
 
     genomeData, sequenceData = openFile(sys.argv[1:])
 
-    result, broj= robinKarpAlgorithm(genomeData, sequenceData)
-    #print (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    #print ("broj: " + str(broj))
-    #print ("result: " + str(result))
-    for i in range(len(result), 0, -1):
-        print ("Pattern number: %d is found on %d position!" % (result[i - 1][1] + 1,result[i - 1][0] + 1))
+    result = robinKarpAlgorithm(genomeData, sequenceData)
+    for i in range(len(result)):
+        print "Pattern number: %d is found on %d position!" % (result[i][1],result[i][0])
     end = time.time()
-    print (end - start)
+    print "Memory used: " + str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) + "KB"
+    print "Time to run: %.2f sec" % (end-start)
