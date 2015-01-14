@@ -32,7 +32,7 @@ def openFile(argv):
     sequenceFile.close()
 
     n = len(sequenceData[0])
-    for i in range(len(sequenceData)):
+    for i in xrange(len(sequenceData)):
         if (len(sequenceData[i]) != n):
             print "Sequences of different sizes!"
             exit()
@@ -55,6 +55,7 @@ def robinKarpAlgorithm(genomeData, sequenceData):
     In every iteration new sumHash is calculated by subtraction ASCII value of old letter and by adding ASCII letter
     of new letter. MulHash is calculated by subtraction of ASCII value of old letter multiplied with factor length of
     string and by adding current value of sumHash.
+    Hits is used for calculating accuracy score.
     '''
     n = len(genomeData)
     m = len(sequenceData[0])
@@ -64,29 +65,31 @@ def robinKarpAlgorithm(genomeData, sequenceData):
     mulHash_pattern = []
     sumHash = 0
     mulHash = 0
+    hits = 0
 
-    for i in range(k):
+    for i in xrange(k):
         sumHash_patternTemp = 0
         mulHash_patternTemp = 0
-        for j in range(m):
+        for j in xrange(m):
             sumHash_patternTemp += ord(sequenceData[i][j])
             mulHash_patternTemp += (m - j)*ord(sequenceData[i][j])
         sumHash_pattern.append(sumHash_patternTemp)
         mulHash_pattern.append(mulHash_patternTemp)
-    for i in range(m):
+    for i in xrange(m):
         sumHash += ord(genomeData[i])
         mulHash += (m-i)*ord(genomeData[i])
 
-    for i in range(n - m + 1):
-        for j in range(k):
+    for i in xrange(n - m + 1):
+        for j in xrange(k):
             if((sumHash_pattern[j] == sumHash) and (mulHash_pattern[j] == mulHash)):
+                hits += 1
                 if (str(sequenceData[j]) == str(genomeData[i:i+m])):
                     result.append([i,j])
         if i < n -m:
             sumHash = sumHash - ord(genomeData[i]) + ord(genomeData[i + m])
             mulHash = mulHash - m*ord(genomeData[i]) + sumHash
 
-    return result
+    return result, hits
 
 if __name__ == "__main__":
     '''
@@ -101,10 +104,11 @@ if __name__ == "__main__":
         exit()
 
     genomeData, sequenceData = openFile(sys.argv[1:])
+    result, hits = robinKarpAlgorithm(genomeData, sequenceData)
 
-    result = robinKarpAlgorithm(genomeData, sequenceData)
-    for i in range(len(result)):
+    for i in xrange(len(result)):
         print "Pattern number: %d is found on %d position!" % (result[i][1],result[i][0])
     end = time.time()
-    print "Memory used: " + str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) + "KB"
+    print "Accuracy score: %.2f %%" % (len(result)/float(hits)*100)
+    print "Memory used: " + str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) + " KB"
     print "Time to run: %.2f sec" % (end-start)
