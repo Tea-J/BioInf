@@ -10,7 +10,7 @@ if __name__ == '__main__':
     n = int(sys.argv[2])
     d = int(sys.argv[3])
     randomList = []
-    patternFiles = open("PatternFiles.fa", "w")
+    patternFiles = open("%dpatterns%dsize.fa" % (n, d), "w")
 
     for i in range(n):
         random = randint(0,len(genomeData) - d)
