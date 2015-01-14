@@ -218,7 +218,7 @@ public class RabinKarp {
 				
 				while (scanner.hasNext())
 		        {
-					test.append(scanner.useDelimiter("\n").nextLine());
+					test.append(scanner.useDelimiter(System.lineSeparator()).nextLine());
 					if (test.charAt(0) != '>') // ako se radi o komentaru preskoèi taj red
 						stringBuffer.append(test);
 					test.delete(0, test.length());
