@@ -26,11 +26,14 @@ namespace Bioinformatika
         public static void Main(string[] args)
         {
             long bytes1 = GC.GetTotalMemory(false);
-            Process proc = Process.GetCurrentProcess();
 
             const int NUMBER_OF_INPUT_ARGUMENTS = 2;
             const int GENOME_FILE_INDEX = 0;
             const int PATTERN_FILE_INDEX = 1;
+
+            Stopwatch stopwatchAll = new Stopwatch();
+            stopwatchAll.Reset();
+            stopwatchAll.Start();
 
             if (args.Length < NUMBER_OF_INPUT_ARGUMENTS)
             {
@@ -133,15 +136,18 @@ namespace Bioinformatika
 
             StartMultipleSearch(genome, patterns);
 
-            proc.Refresh();
+            stopwatchAll.Stop();
+
+            Console.WriteLine();
+            Console.WriteLine("    Overall time: {0} ms.", stopwatchAll.ElapsedMilliseconds);
+            Console.WriteLine();
 
             long bytes2 = GC.GetTotalMemory(true);
-            Console.Write("Number of bytes allocated: ");
-            Console.WriteLine(bytes2 - bytes1);
-
-            long bytes3 = proc.PeakWorkingSet64;
-            Console.Write("Number of bytes allocated: ");
-            Console.WriteLine(bytes3 + "bytes");
+            Console.Write("    Number of bytes allocated: ");
+            Console.WriteLine(bytes2 - bytes1 + " bytes");
+            Console.WriteLine();
+            Console.WriteLine("**********************************************************");
+            Console.WriteLine();
         }
 
         /// <summary>
@@ -162,7 +168,11 @@ namespace Bioinformatika
             }
 
             Console.WriteLine();
-            Console.WriteLine("False positives: {0} ", falsePositive);
+            Console.WriteLine("**********************************************************");
+            Console.WriteLine();
+            Console.WriteLine("    False positives: {0} ", falsePositive);
+            Console.WriteLine();
+            Console.WriteLine("    Accuracy: {0} %", ((patterns.Length / (patterns.Length - (int)falsePositive)) * 100));
         }
 
         /// <summary>
