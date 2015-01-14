@@ -35,19 +35,19 @@ public class RabinKarp {
 						
 			if (patternLength < textLength && patternLength > 0){
 				
-				long p = 0;
-				long t = 0;
+				long patternHash = 0;
+				long textHash = 0;
 				
 				for(int i = 0; i < patternLength; i++)
 				{
-					p = (p*charMaxValue+patternArray[i]) % modValue;
-					t = (t*charMaxValue+textArray[i])% modValue;
+					patternHash = (patternHash*charMaxValue+patternArray[i]) % modValue;
+					textHash = (textHash*charMaxValue+textArray[i])% modValue;
 				}
 				long h = rabinKarp.powMod(charMaxValue, patternLength-1, modValue);
 				
 				for(int i=0; i<= textLength-patternLength; i++)
 				{
-					if(p==t)
+					if(patternHash==textHash)
 					{
 						if(rabinKarp.compare(textArray, i, patternArray))
 						{
@@ -56,10 +56,10 @@ public class RabinKarp {
 					}
 					if(i<textLength-patternLength)
 					{
-						t-=h*textArray[i];
-						while(t<0)
-							t += modValue;
-						t = (charMaxValue * t + textArray[i + patternLength]) % modValue; // veæ smo izraèunali za prvi patternlength
+						textHash-=h*textArray[i];
+						while(textHash<0)
+							textHash += modValue;
+						textHash = (charMaxValue * textHash + textArray[i + patternLength]) % modValue; // veæ smo izraèunali za prvi patternlength
 					}
 				}
 			}
@@ -82,11 +82,11 @@ public class RabinKarp {
             return 1;
         if (n == 1)
             return d % q;
-        long j = powMod(d, n / 2, q);
-        j = (j * j) % q;
+        long temp = powMod(d, n / 2, q);
+        temp = (temp * temp) % q;
         if (n % 2 == 0)
-            return j;
-        return ((j * d) % q);
+            return temp;
+        return ((temp * d) % q);
 	}
 	
 	private void printResult (char[] textArray, LinkedList<LinkedList<Integer>> indexOfMatches)
@@ -105,10 +105,17 @@ public class RabinKarp {
 			{
 				for(LinkedList<Integer> indexOfMatch : indexOfMatches)
 				{
-					for(int index : indexOfMatch)
+					if (indexOfMatch.isEmpty())
 					{
-						writer.write("Match with pattern no."+patternNumber+" detected, starting with index: " + 
-					index +	System.lineSeparator() + System.lineSeparator());
+						writer.write("There is no match between pattern no."+patternNumber+" and text!");
+					}
+					else
+					{
+						for(int index : indexOfMatch)
+						{
+							writer.write("Match with pattern no."+patternNumber+" detected, starting with index: " + 
+						index +	System.lineSeparator() + System.lineSeparator());
+						}
 					}
 					patternNumber++;
 				}
