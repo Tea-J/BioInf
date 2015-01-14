@@ -94,6 +94,7 @@ public class RabinKarp {
 		int patternNumber = 1;
 		try {
 			File file = new File("result.txt");
+			//File file = new File("mp44464","result.txt");
 			FileWriter writer = new FileWriter(file);
 			
 			if(indexOfMatches.isEmpty())
