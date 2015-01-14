@@ -22,7 +22,7 @@ public class RabinKarp {
 		LinkedList<LinkedList<Integer>> indexOfMatches = new LinkedList<LinkedList<Integer>>();
 		RabinKarp rabinKarp = new RabinKarp();
 		final long charMaxValue = Character.MAX_VALUE + 1;	
-	    final long modValue = 15485867; //96293 
+	    final long modValue = 499979; //96293 15485867
 		
 		String workingDirectory = System.getProperty("user.dir");
 		
@@ -171,9 +171,10 @@ public class RabinKarp {
 					}
 				}
 				tempArray = stats[patternNumber-1].split(",");
+				float efficiency = Float.parseFloat(tempArray[2])/Float.parseFloat(tempArray[1]);
 				writer.write("Time of execution for pattern no."+patternNumber+" is: "+tempArray[0]+ 
-					"; Hash hits: "+ tempArray[1]+"; Actual Hits: "+ tempArray[2]
-						+	System.lineSeparator() + System.lineSeparator()+ System.lineSeparator());
+					" ms; Hash hits: "+ tempArray[1]+"; Actual Hits: "+ tempArray[2]+ "; Hash efficiency: "+
+						efficiency+	System.lineSeparator() + System.lineSeparator()+ System.lineSeparator());
 				patternNumber++;
 			}
 		writer.close();
@@ -198,16 +199,18 @@ public class RabinKarp {
 		Scanner scanner = null;
 		StringBuffer stringBuffer =  new StringBuffer();
 		
-		if (string.contains(".txt"))
+		if (string.contains(".txt") || string.contains(".fa"))
 		{		
 			try { 
 				scanner = new Scanner(new File(workingDirectory, string));
-				
 				while (scanner.hasNextLine())
 		        {
 					stringBuffer.append(scanner.nextLine());
-					charArray = stringBuffer.toString().toCharArray();
-					ListOfCharArrays.add(charArray);
+						if(stringBuffer.charAt(0)!= '>')
+						{
+							charArray = stringBuffer.toString().toCharArray();
+							ListOfCharArrays.add(charArray);
+						}
 					stringBuffer.delete(0, stringBuffer.length());
 		        }
 			}
@@ -244,7 +247,6 @@ public class RabinKarp {
 		{		
 			try { 
 				scanner = new Scanner(new File(workingDirectory, string));
-				
 				while (scanner.hasNext())
 		        {
 					test.append(scanner.useDelimiter(System.lineSeparator()).nextLine());
