@@ -75,6 +75,7 @@ def robinKarpAlgorithm(genomeData, sequenceData):
             mulHash_patternTemp += (m - j)*ord(sequenceData[i][j])
         sumHash_pattern.append(sumHash_patternTemp)
         mulHash_pattern.append(mulHash_patternTemp)
+
     for i in xrange(m):
         sumHash += ord(genomeData[i])
         mulHash += (m-i)*ord(genomeData[i])
