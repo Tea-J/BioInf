@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 /**
- * Rabin Karp algoritam pretrage stringa s više ulaznih nizeva 
+ * Rabin Karp string searching algorithm 
  * 
  * @author Matija Petanjek
  */
@@ -22,10 +22,12 @@ public class RabinKarp {
 		LinkedList<LinkedList<Integer>> indexOfMatches = new LinkedList<LinkedList<Integer>>();
 		RabinKarp rabinKarp = new RabinKarp();
 		final long charMaxValue = Character.MAX_VALUE + 1;	
-	    final long modValue = 499979; //96293 15485867
-		
+	    final long modValue = 15485867; /*96293 499979 15485867; working with greater prime prolongs
+	    								execution time but increases hash efficiency*/
+	    
+	    long fullTimeStart = System.currentTimeMillis();;
 		String workingDirectory = System.getProperty("user.dir");
-		
+
 		long start = System.currentTimeMillis();
 		textArray = rabinKarp.readTextFile(workingDirectory, args[0]);
 		listOfPatternArrays = rabinKarp.readPatternFile(workingDirectory, args[1]);
@@ -91,17 +93,17 @@ public class RabinKarp {
 		Runtime runtime = Runtime.getRuntime();
 		long memory = runtime.totalMemory() - runtime.freeMemory();
 		
-		rabinKarp.printResult(indexOfMatches, memory, timeToRead, stats);
+		rabinKarp.printResult(indexOfMatches, memory, timeToRead, stats, fullTimeStart);
 	}
 	
 	/**
-	 * Metoda compare usporeðuje dva niza nakon što smo ustanovili da su
-	 * im hash kodovi jednaki, kako bi potvrdili da nije rijeè o false positive sluèaju
+	 * Method compare compares two arrays with the same hash code,
+	 * so we can establish it's not a false positive case
 	 * 
-	 * @param text 		podniz iz genom.fa 
-	 * @param start    	poèetni index podniza u genom.fa 
-	 * @param pattern   niz iz pattern.txt
-	 * @return			vraæa true ako su nizevi jednaki, inaèe false 
+	 * @param text 		substring from genome file 
+	 * @param start    	starting index of substring from genome file 
+	 * @param pattern   char array from pattern file
+	 * @return			return true if arrays are identical, otherwise false  
 	 */
 	
 	private boolean compare(char[] text, int start, char[] pattern) {
@@ -114,9 +116,6 @@ public class RabinKarp {
     }
 	
 	/**
-	 * Metoda powMod raèuna vrijednost za odbacivanje zadnjeg 
-	 * znaka iz podniza textArray
-	 *
 	 * @param d
 	 * @param n
 	 * @param q
@@ -135,12 +134,13 @@ public class RabinKarp {
 	}
 	
 	/**
-	 * Metoda printResult u result.txt file ispisuje poèetne indexe 
-	 * preklapanja ulaznih nizeva iz pattern.txt i genoma iz genom.fa
+	 * Method printResult creates result.txt file where she writes the  
+	 * results of the algorithm
 	 * 
 	 * @param indexOfMatches
 	 */
-	private void printResult (LinkedList<LinkedList<Integer>> indexOfMatches, long memory, long timeToRead, String[] stats)
+	private void printResult (LinkedList<LinkedList<Integer>> indexOfMatches, 
+		long memory, long timeToRead, String[] stats, long fullTimeStart)
 	{
 		int patternNumber = 1;
 		try {
@@ -177,6 +177,8 @@ public class RabinKarp {
 						efficiency+	System.lineSeparator() + System.lineSeparator()+ System.lineSeparator());
 				patternNumber++;
 			}
+			long fullTimeEnd = System.currentTimeMillis();
+			writer.write("Time elapsed: "+String.valueOf(fullTimeEnd-fullTimeStart)+" ms");
 		writer.close();
 		}
 		catch (IOException e) {
@@ -185,12 +187,11 @@ public class RabinKarp {
 	}
 	
 	/**
-	 * Metoda readPatternFile uèitava iz file-a ulazni niz u polje 
-	 * char-ova, a zatim polje dodaje u LinkedList-u, i tako za svaki ulazni niz
+	 * Method readPatternFile loads data from pattern file into char arrays
 	 * 
-	 * @param workingDirectory	put do file-a
-	 * @param string			ime file-a
-	 * @return 					Linked List-u koja sadrži polja charova ulaznih nizeva
+	 * @param workingDirectory	file path
+	 * @param string			file name
+	 * @return 					Linked List containing char arrays of patterns
 	 */
 	private LinkedList<char[]> readPatternFile(String workingDirectory, String string)
 	{
@@ -231,10 +232,10 @@ public class RabinKarp {
 	}
 	
 	/**
-	 * Metoda readTextFile uèitava cijeli genom u polje charova
-	 * @param workingDirectory	put do file-a
-	 * @param string			ime file-a
-	 * @return					polje charova sastavljeno od genoma
+	 * Method readTextFile load genome into char array 
+	 * @param workingDirectory	file path
+	 * @param string			file name
+	 * @return					char array containing genome
 	 */
 	private char[] readTextFile(String workingDirectory, String string)
 	{
@@ -250,7 +251,7 @@ public class RabinKarp {
 				while (scanner.hasNext())
 		        {
 					test.append(scanner.useDelimiter(System.lineSeparator()).nextLine());
-					if (test.charAt(0) != '>') // ako se radi o komentaru preskoèi taj red
+					if (test.charAt(0) != '>') // if comment skip line
 						stringBuffer.append(test);
 					test.delete(0, test.length());
 		        }
