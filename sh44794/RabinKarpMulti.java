@@ -41,15 +41,17 @@ public class RabinKarpMulti {
     private Path genomePath = null;
     private int hashHits = 0;
     private int actualHits = 0;
-    List<Integer> indexHitList = new ArrayList<>();
-    List<Point> indexPatternHitList = new ArrayList<>();
+    private List<Integer> indexHitList = new ArrayList<>();
+    private List<Point> indexPatternHitList = new ArrayList<>();
+    private HashSet<HashClass> hashSet = new HashSet<>();
+    private boolean sequancesHaveEqualHash = false;
 
     public static void main(String[] args) {
 
         Path[] sequencePathArray = new Path[args.length - 1];
         Path genPath = null;
 
-        if (args.length <= 2) {
+        if (args.length < 2) {
             System.out.println("Program requires at least two arguments: ");
             System.out.println("1. Path to genome");
             System.out.println("2. Path to sequence");
@@ -83,13 +85,33 @@ public class RabinKarpMulti {
         long start = System.currentTimeMillis();
         prepareFiles();
         readFiles();
+        long end = System.currentTimeMillis();
+        System.out.println("Time elapsed for preparing and reading: " + (end - start) + " ms");
+        start = System.nanoTime();
         if (sequanceHashesEqualLength) {
-            runRabinKarp();
+            initHash();
+        } else {
+            initHashDiff();
+        }
+        end = System.nanoTime();
+        System.out.println("Time elapsed for init hash: " + (end - start)/1000 + " us");
+        
+        int mb = 1024*1024;
+        Runtime runtime = Runtime.getRuntime();
+        System.out.println("Used Memory: " + (runtime.totalMemory() - runtime.freeMemory()) / mb + " Mb");
+        start = System.currentTimeMillis();
+        if (sequanceHashesEqualLength) {
+            if(!sequancesHaveEqualHash){
+                runRabinKarp();
+            }
+            else{
+                runRabinKarpHasEqual();
+            }
         } else {
             runRabinKarpDifferentLengths();
         }
 
-        long end = System.currentTimeMillis();
+        end = System.currentTimeMillis();
         System.out.println("Time elapsed: " + (end - start) + " ms");
         System.out.format("Matched patterns/Matched Hashes: %d/%d \n", actualHits, hashHits);
         System.out.format("Hash efficiency: %f \n", ((float) actualHits / hashHits));
@@ -106,12 +128,13 @@ public class RabinKarpMulti {
         storeEditedFile(genomePath, genomePath2);
         genomePath = genomePath2;
 
-        for (Path p : sequencePathArray) {
+        for (int i = 0; i < sequencePathArray.length; ++i) {
+            Path p = sequencePathArray[i];
             String sP = p.toString();
             dot = sP.lastIndexOf('.');
             Path p2 = Paths.get(sP.substring(0, dot) + "_edited" + sP.substring(dot));
             storeEditedFile(p, p2);
-            p = p2;
+            sequencePathArray[i] = p2;
         }
     }
 
@@ -121,9 +144,16 @@ public class RabinKarpMulti {
             FileOutputStream fos = new FileOutputStream(outPath.toFile());
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos, charset));
             String line = null;
+            boolean firstLine = true;
             while ((line = reader.readLine()) != null) {
                 if (!line.startsWith(">")) {
                     bw.write(line);
+                    firstLine = false;
+                }
+                else{
+                    if(!firstLine){
+                        bw.write(System.lineSeparator());
+                    }
                 }
             }
             reader.close();
@@ -137,8 +167,16 @@ public class RabinKarpMulti {
         try {
             genomeData = Files.readAllBytes(genomePath);
             genomeSize = genomeData.length;
+            Charset charset = StandardCharsets.ISO_8859_1;
             for (Path p : sequencePathArray) {
-                sequenceDataList.add(Files.readAllBytes(p));
+                BufferedReader reader = Files.newBufferedReader(p, charset);
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if(!line.equals("")){
+                        sequenceDataList.add(line.getBytes(charset));
+                    }
+                }
+                //sequenceDataList.add(Files.readAllBytes(p));
             }
         } catch (IOException ex) {
             Logger.getLogger(RabinKarp.class.getName()).log(Level.SEVERE, null, ex);
@@ -158,7 +196,45 @@ public class RabinKarpMulti {
     void runRabinKarp() {
         int i = 0;
 
-        initHash();
+        //initHash();
+
+        while (i < (genomeSize - sequenceSize)) {
+            if (hashSet.contains(genomeHash)) {
+                int index = sequanceHashList.indexOf(genomeHash);
+                if (index != -1) {
+                    hashHits++;
+
+                    if (checkPattern(i, index)) {
+                        actualHits++;
+                        indexPatternHitList.add(new Point(i, index));
+                        //vrati odmah da ima ili broji kolko ih ima ili spremi pocetne indexe svakog ponavljanja
+                    }
+                }
+            }
+            hash(++i);
+        }
+        
+
+        // check last sequence 
+        for (int j = 0; j < sequanceHashList.size(); ++j) {
+            if (hashSet.contains(genomeHash)) {
+                int index = sequanceHashList.lastIndexOf(genomeHash);
+                if (index != -1) {
+                    hashHits++;
+                    if (checkPattern(i, index)) {
+                        actualHits++;
+                        indexPatternHitList.add(new Point(i, index));
+                        //vrati odmah da ima ili broji kolko ih ima ili spremi pocetne indexe svakog ponavljanja
+                    }
+                }
+            }
+        }
+    }
+
+    void runRabinKarpHasEqual() {
+        int i = 0;
+
+        //initHash();
 
         while (i < (genomeSize - sequenceSize)) {
             for (int j = 0; j < sequanceHashList.size(); ++j) {
@@ -173,8 +249,9 @@ public class RabinKarpMulti {
                     }
                 }
             }
+            hash(++i);
         }
-        hash(++i);
+        
 
         // check last sequence 
         for (int j = 0; j < sequanceHashList.size(); ++j) {
@@ -193,7 +270,7 @@ public class RabinKarpMulti {
     void runRabinKarpDifferentLengths() {
         int i = 0;
 
-        initHashDiff();
+        //initHashDiff();
 
         //TODO provjeravati za do min duljinu podniza i paziti da ove duze ne gledam pred kraj
         while (i < (genomeSize - minSequenceSize)) {
@@ -209,19 +286,21 @@ public class RabinKarpMulti {
                         }
                     }
                 }
-
             }
         }
         hashDiff(++i);
 
         // check last sequence 
         for (int j = 0; j < sequanceHashList.size(); ++j) {
-            HashClass h = sequanceHashList.get(j);
-            if (genomeHash.equals(h)) {
-                hashHits++;
-                if (checkPattern(i, j)) {
-                    actualHits++;
-                    indexPatternHitList.add(new Point(i, j));
+            if (i <= genomeSize - sequenceDataList.get(j).length) {
+                HashClass h = sequanceHashList.get(j);
+                HashClass g = genomeHashList.get(j);
+                if (g.equals(h)) {
+                    hashHits++;
+                    if (checkPattern(i, j)) {
+                        actualHits++;
+                        indexPatternHitList.add(new Point(i, j));
+                    }
                 }
             }
         }
@@ -231,7 +310,8 @@ public class RabinKarpMulti {
         genomeHash.nextHash(genomeData[start - 1], genomeData[start + sequenceSize - 1], sequenceSize);
     }
 
-    void hashDiff(int start) {
+    void hashDiff(int start
+    ) {
         for (int i = 0; i < sequenceDataList.size(); ++i) {
             HashClass gen = genomeHashList.get(i);
             int pattLen = sequenceDataList.get(i).length;
@@ -255,11 +335,23 @@ public class RabinKarpMulti {
             patSum = 0;
             byte[] pattern = sequenceDataList.get(i);
             for (int j = 0; j < pattern.length; ++j) {
-                patSum += pattern[i];
-                patMull += (sequenceSize - i) * pattern[i];
+                patSum += pattern[j];
+                patMull += (sequenceSize - j) * pattern[j];
             }
             sequanceHashList.add(new HashClass(patMull, patSum));
         }
+
+        for (int i = 0; i < sequanceHashList.size()-1; i++) {
+            HashClass h = sequanceHashList.get(i);
+            hashSet.add(h);
+            for (int j = i + 1; j < sequanceHashList.size(); j++) {
+                if (h.equals(sequanceHashList.get(j))) {
+                    sequancesHaveEqualHash = false;
+                }
+
+            }
+        }
+        hashSet.add(sequanceHashList.get(sequanceHashList.size()-1));
     }
 
     void initHashDiff() {
@@ -287,7 +379,8 @@ public class RabinKarpMulti {
         }
     }
 
-    boolean checkPattern(int start, int pat) {
+    boolean checkPattern(int start, int pat
+    ) {
         byte[] pattern = sequenceDataList.get(pat);
         for (int i = 0; i < pattern.length; ++i) {
             if (pattern[i] != genomeData[start + i]) {
