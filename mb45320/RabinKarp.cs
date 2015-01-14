@@ -179,7 +179,7 @@ namespace Bioinformatika
             {
                 if (instances[i].Count > 0)
                 {
-                    Console.Write("{0} found on indices: ", patterns[i]);
+                    Console.Write("Pattern {0}... found on indices: ", patterns[i].Substring(0, 8));
                     foreach (var index in instances[i])
                         Console.Write("{0} ", index);
                     Console.WriteLine();
@@ -187,7 +187,7 @@ namespace Bioinformatika
                 }
                 if (!found)
                 {
-                    Console.WriteLine("Pattern {0}... found on indices: ", patterns[i].Substring(0,10));
+                    Console.WriteLine("No patterns of length {0} found in the genome.", patterns[0].Length);
                 }
             }
             Console.WriteLine();
