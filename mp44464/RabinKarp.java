@@ -13,6 +13,7 @@ import java.util.Scanner;
  * @author Matija Petanjek
  */
 public class RabinKarp {
+	private static final long MEGABYTE = 1024L * 1024L;
 
 	public static void main(String[] args) {
 		
@@ -21,17 +22,25 @@ public class RabinKarp {
 		LinkedList<LinkedList<Integer>> indexOfMatches = new LinkedList<LinkedList<Integer>>();
 		RabinKarp rabinKarp = new RabinKarp();
 		final long charMaxValue = Character.MAX_VALUE + 1;	
-	    final long modValue = 96293; 
+	    final long modValue = 15485867; //96293 
 		
 		String workingDirectory = System.getProperty("user.dir");
 		
+		long start = System.currentTimeMillis();
 		textArray = rabinKarp.readTextFile(workingDirectory, args[0]);
-		int textLength = textArray.length;
-		
 		listOfPatternArrays = rabinKarp.readPatternFile(workingDirectory, args[1]);
+		long end = System.currentTimeMillis();
+		long timeToRead = end - start;
+		
+		int textLength = textArray.length;
+		StringBuilder sb= new StringBuilder();
+		String[] stats = new String[listOfPatternArrays.size()];
+		int counter = 0;
 		
 		for(char[] patternArray : listOfPatternArrays)
-		{		
+		{	
+			int hashHits = 0;
+		    int actualHits = 0;
 			int patternLength = patternArray.length;
 			LinkedList<Integer> indexOfMatch = new LinkedList<Integer>();
 						
@@ -39,6 +48,7 @@ public class RabinKarp {
 				
 				long patternHash = 0;
 				long textHash = 0;
+				start = System.currentTimeMillis();
 				
 				for(int i = 0; i < patternLength; i++)
 				{
@@ -51,8 +61,10 @@ public class RabinKarp {
 				{
 					if(patternHash==textHash)
 					{
+						hashHits++;
 						if(rabinKarp.compare(textArray, i, patternArray))
 						{
+							actualHits++;
 							indexOfMatch.add(i);
 						}
 					}
@@ -65,9 +77,21 @@ public class RabinKarp {
 					}
 				}
 			}
+			end = System.currentTimeMillis();
 			indexOfMatches.add(indexOfMatch);
+			sb.append(end - start);
+			sb.append(",");
+			sb.append(hashHits);
+			sb.append(",");
+			sb.append(actualHits);
+			stats[counter]= sb.toString();
+			sb.delete(0, sb.length());
+			counter++;
 		}
-		rabinKarp.printResult(indexOfMatches);
+		Runtime runtime = Runtime.getRuntime();
+		long memory = runtime.totalMemory() - runtime.freeMemory();
+		
+		rabinKarp.printResult(indexOfMatches, memory, timeToRead, stats);
 	}
 	
 	/**
@@ -116,7 +140,7 @@ public class RabinKarp {
 	 * 
 	 * @param indexOfMatches
 	 */
-	private void printResult (LinkedList<LinkedList<Integer>> indexOfMatches)
+	private void printResult (LinkedList<LinkedList<Integer>> indexOfMatches, long memory, long timeToRead, String[] stats)
 	{
 		int patternNumber = 1;
 		try {
@@ -124,30 +148,35 @@ public class RabinKarp {
 			//File file = new File("mp44464","result.txt");
 			FileWriter writer = new FileWriter(file);
 			
-			if(indexOfMatches.isEmpty())
+			writer.write("Used memory amounts: "+(memory/MEGABYTE)+" Megabytes"
+				+	System.lineSeparator() + System.lineSeparator());
+			
+			writer.write("Time to process and read files is: "+timeToRead+" ms"
+				+	System.lineSeparator() + System.lineSeparator());
+			
+			for(LinkedList<Integer> indexOfMatch : indexOfMatches)
 			{
-				writer.write("There is no match between pattern and text!");
-			}
-			else
-			{
-				for(LinkedList<Integer> indexOfMatch : indexOfMatches)
+				String[] tempArray = new String[3];
+				if (indexOfMatch.isEmpty())					
 				{
-					if (indexOfMatch.isEmpty())
-					{
-						writer.write("There is no match between pattern no."+patternNumber+" and text!");
-					}
-					else
-					{
-						for(int index : indexOfMatch)
-						{
-							writer.write("Match with pattern no."+patternNumber+" detected, starting with index: " + 
-						index +	System.lineSeparator() + System.lineSeparator());
-						}
-					}
-					patternNumber++;
+					writer.write("There is no match between pattern no."+patternNumber+" and text!"
+						+	System.lineSeparator() + System.lineSeparator());
 				}
+				else
+				{
+					for(int index : indexOfMatch)						
+					{
+						writer.write("Match with pattern no."+patternNumber+" detected, starting with index: " + 
+							index +	System.lineSeparator() + System.lineSeparator());
+					}
+				}
+				tempArray = stats[patternNumber-1].split(",");
+				writer.write("Time of execution for pattern no."+patternNumber+" is: "+tempArray[0]+ 
+					"; Hash hits: "+ tempArray[1]+"; Actual Hits: "+ tempArray[2]
+						+	System.lineSeparator() + System.lineSeparator()+ System.lineSeparator());
+				patternNumber++;
 			}
-			writer.close();
+		writer.close();
 		}
 		catch (IOException e) {
 			e.printStackTrace();
