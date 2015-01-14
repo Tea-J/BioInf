@@ -112,7 +112,6 @@ public class RabinKarp {
 					patternNumber++;
 				}
 			}
-			//writer.write(textArray);
 			writer.close();
 		}
 		catch (IOException e) {
