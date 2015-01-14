@@ -1,0 +1,117 @@
+Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel 10patterns100size 
+Time elapsed for preparing and reading: 202 ms
+Time elapsed for init hash: 1846 us
+Used Memory: 18 Mb
+Time elapsed for algorithm: 218 ms
+Total time elapsed: 436 ms
+Matched patterns/Matched Hashes: 10/35 
+Hash efficiency: 0.285714 
+Pattern start index 403589, pattern num 1 
+Pattern start index 542701, pattern num 2 
+Pattern start index 880643, pattern num 3 
+Pattern start index 1360994, pattern num 4 
+Pattern start index 1605627, pattern num 5 
+Pattern start index 1671413, pattern num 6 
+Pattern start index 1850349, pattern num 7 
+Pattern start index 1960703, pattern num 8 
+Pattern start index 2041781, pattern num 9 
+Pattern start index 3518509, pattern num 10 
+
+
+
+Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel 10patterns1000size 
+Time elapsed for preparing and reading: 218 ms
+Time elapsed for init hash: 2097 us
+Used Memory: 18 Mb
+Time elapsed for algorithm: 219 ms
+Total time elapsed: 437 ms
+Matched patterns/Matched Hashes: 10/10 
+Hash efficiency: 1.000000 
+Pattern start index 438799, pattern num 1 
+Pattern start index 737254, pattern num 2 
+Pattern start index 1342769, pattern num 3 
+Pattern start index 2811552, pattern num 4 
+Pattern start index 2859247, pattern num 5 
+Pattern start index 2999914, pattern num 6 
+Pattern start index 3189660, pattern num 7 
+Pattern start index 3844867, pattern num 8 
+Pattern start index 4219946, pattern num 9 
+Pattern start index 4604002, pattern num 10 
+
+
+Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel 10patterns10000size 
+Time elapsed for preparing and reading: 250 ms
+Time elapsed for init hash: 4655 us
+Used Memory: 19 Mb
+Time elapsed for algorithm: 249 ms
+Total time elapsed: 499 ms
+Matched patterns/Matched Hashes: 10/10 
+Hash efficiency: 1.000000 
+Pattern start index 59532, pattern num 1 
+Pattern start index 146992, pattern num 2 
+Pattern start index 333002, pattern num 3 
+Pattern start index 1188765, pattern num 4 
+Pattern start index 1268027, pattern num 5 
+Pattern start index 1795909, pattern num 6 
+Pattern start index 3280548, pattern num 7 
+Pattern start index 3709673, pattern num 8 
+Pattern start index 4315978, pattern num 9 
+Pattern start index 4431789, pattern num 10 
+
+
+
+Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel 10patterns100000size 
+Time elapsed for preparing and reading: 296 ms
+Time elapsed for init hash: 11280 us
+Used Memory: 22 Mb
+Time elapsed for algorithm: 234 ms
+Total time elapsed: 546 ms
+Matched patterns/Matched Hashes: 10/10 
+Hash efficiency: 1.000000 
+Pattern start index 224484, pattern num 1 
+Pattern start index 534314, pattern num 2 
+Pattern start index 752294, pattern num 3 
+Pattern start index 828728, pattern num 4 
+Pattern start index 1114133, pattern num 5 
+Pattern start index 1834528, pattern num 6 
+Pattern start index 2553285, pattern num 7 
+Pattern start index 2627517, pattern num 8 
+Pattern start index 2993732, pattern num 9 
+Pattern start index 4500635, pattern num 10
+
+
+
+Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel 10patterns1000000size 
+Time elapsed for preparing and reading: 967 ms
+Time elapsed for init hash: 89945 us
+Used Memory: 26 Mb
+Time elapsed for algorithm: 280 ms
+Total time elapsed: 1341 ms
+Matched patterns/Matched Hashes: 10/10 
+Hash efficiency: 1.000000 
+Pattern start index 607024, pattern num 1 
+Pattern start index 822207, pattern num 2 
+Pattern start index 841980, pattern num 3 
+Pattern start index 970724, pattern num 4 
+Pattern start index 1821427, pattern num 5 
+Pattern start index 1825271, pattern num 6 
+Pattern start index 2446212, pattern num 7 
+Pattern start index 2914625, pattern num 8 
+Pattern start index 3269817, pattern num 9 
+Pattern start index 3395785, pattern num 10  
+
+
+
+Escherichia_coli_asm59784v1.GCA_000597845.1.24.dna.toplevel 10patternsDiffsize 
+Time elapsed for preparing and reading: 297 ms
+Time elapsed for init hash: 17998 us
+Used Memory: 12 Mb
+Time elapsed for algorithm: 1966 ms
+Total time elapsed: 2278 ms
+Matched patterns/Matched Hashes: 5/6 
+Hash efficiency: 0.833333 
+Pattern start index 59532, pattern num 3 
+Pattern start index 224484, pattern num 4 
+Pattern start index 403589, pattern num 1 
+Pattern start index 438799, pattern num 2 
+Pattern start index 607024, pattern num 5 
