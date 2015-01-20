@@ -26,7 +26,7 @@ int Check(char *A, char *B){
 
 
 int main(int argc, char *argv[]){
-	FILE *genome; FILE *input;
+	FILE *genome; FILE *input; FILE *output;
 	int i, j, no_results, lpattern;
 	int num_patterns = 10;
 	int *result;
@@ -45,10 +45,11 @@ int main(int argc, char *argv[]){
 		return 0;
 	}
 	
-	input = fopen(argv[1], "r");
-	genome = fopen("new.txt", "w");
+	genome = fopen(argv[1], "r");
+	input = fopen(argv[2], "r");
+	output = fopen("output.txt", "w");
 
-	if (input == NULL || genome == NULL){
+	if (input == NULL || genome == NULL || output == NULL){
 		fprintf(stderr, "Error opening file.\n");
 		getchar();
 		return 0;
@@ -58,25 +59,6 @@ int main(int argc, char *argv[]){
 
 	buffer = (char *)malloc(N*sizeof(char));
 
-	//Saving data to a new file, without comments or blank spaces
-	while (fgets(buffer, N, input)){
-		if (*buffer == '>')
-			continue;
-		fwrite(buffer, sizeof(char), strlen(buffer) - 1, genome);
-	}
-	fwrite("\0", sizeof(char), 1, genome);
-
-	fclose(input);
-	fclose(genome);
-
-	input = fopen(argv[2], "r");	
-	genome = fopen("new.txt", "r");
-
-	if (input == NULL || genome == NULL){
-		fprintf(stderr, "Error opening file.\n");
-		getchar();
-		return 0;
-	}
 
 	fseek(genome, 0, SEEK_END);
 	input_file_size = ftell(genome);
@@ -102,6 +84,7 @@ int main(int argc, char *argv[]){
 	
 	patterns = (char *)malloc(num_patterns*(lpattern + 1)*sizeof(char));
 	buffer = (char *)realloc(buffer, (lpattern + N)*sizeof(char));
+	memset(buffer, '\0', (lpattern + N)*sizeof(char));
 
 	for (i = 0; i < num_patterns; i++){
 		fgets(buffer, (lpattern + N)*sizeof(char), input);	//Reads comment line
@@ -115,7 +98,7 @@ int main(int argc, char *argv[]){
 	end = clock();
 	dif = ((double)(end - start)) / CLOCKS_PER_SEC;
 
-	fprintf(stderr, "Processing input data took %.2lf ms.\n", dif * 1000);
+	fprintf(output, "Processing input data took %.2lf ms.\n\n", dif * 1000);
 
 	start = clock();
 
@@ -172,7 +155,7 @@ int main(int argc, char *argv[]){
 
 			if (*(result + j)){
 				correctHash++;
-				fprintf(stderr, "%d. pattern found at index %d.\n", j, i);
+				fprintf(output, "%d. pattern found at index %d.\n", j, i);
 				*(result + j) = 0;
 
 				if (no_results)
@@ -182,7 +165,7 @@ int main(int argc, char *argv[]){
 	}
 
 	if (no_results)
-		fprintf(stderr, "No pattern was found.\n");
+		fprintf(output, "No pattern was found.\n");
 
 	end = clock();
 	dif = ((double)(end - start)) / CLOCKS_PER_SEC;
@@ -192,16 +175,17 @@ int main(int argc, char *argv[]){
 	else
 		efficiency = 0;
 
-	fprintf(stderr, "\nDetected: %d\nCorrect: %d\nEfficiency: %.2f %%\n", detectedHash, correctHash, efficiency);
-	fprintf(stderr, "Calculations took %.2lf ms.\n", dif * 1000);
+	fprintf(output, "\nDetected: %d\nCorrect: %d\nEfficiency: %.2f %%\n", detectedHash, correctHash, efficiency);
+	fprintf(output, "Calculations took %.2lf ms.\n", dif * 1000);
 
 	fclose(genome);
+	fclose(output);
 	free(result);
 	free(buffer);
 	free(patterns);
 	free(hpattern);
 	//free(substring);
 
-	getchar();
+	//getchar();
 	return 0;
 }
