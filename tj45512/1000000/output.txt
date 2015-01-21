@@ -1,0 +1,17 @@
+Processing input data took 15.00 ms.
+
+0. pattern found at index 164917.
+1. pattern found at index 200914.
+2. pattern found at index 222319.
+3. pattern found at index 371687.
+4. pattern found at index 449864.
+5. pattern found at index 481600.
+6. pattern found at index 633407.
+7. pattern found at index 665144.
+8. pattern found at index 715990.
+9. pattern found at index 745556.
+
+Detected: 10
+Correct: 10
+Efficiency: 100.00 %
+Calculations took 109.00 ms.
